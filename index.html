@@ -612,6 +612,22 @@
                 0 2px 4px rgba(0, 0, 0, 0.8);
             font-family: 'Orbitron', sans-serif;
             letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .track-title:hover {
+            color: #fff;
+            text-shadow: 
+                0 0 25px rgba(0, 255, 204, 1),
+                0 0 50px rgba(0, 255, 204, 0.8),
+                0 2px 4px rgba(0, 0, 0, 0.8);
+            transform: translateX(3px);
+        }
+
+        .track-title a {
+            color: inherit;
+            text-decoration: none;
         }
 
         .track-artist {
@@ -834,6 +850,18 @@
             font-family: 'Orbitron', sans-serif;
             text-shadow: 0 0 10px rgba(0, 255, 204, 0.6);
             padding-right: 25px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .playlist-item-title:hover {
+            color: #fff;
+            text-shadow: 0 0 15px rgba(0, 255, 204, 0.9);
+        }
+
+        .playlist-item-title a {
+            color: inherit;
+            text-decoration: none;
         }
 
         .playlist-item-artist {
@@ -1486,12 +1514,8 @@
             playlist.forEach((track, index) => {
                 const item = document.createElement('div');
                 item.className = 'playlist-item' + (index === currentTrackIndex ? ' active' : '');
-                item.onclick = () => {
-                    currentTrackIndex = index;
-                    loadTrack(index);
-                    play();
-                    savePlaylistToStorage(); // Save current track
-                };
+                
+                const objktUrl = `https://objkt.com/tokens/${track.contract}/${track.tokenId}`;
                 
                 // Add delete button
                 const deleteBtn = document.createElement('span');
@@ -1503,9 +1527,19 @@
                 };
                 
                 item.innerHTML = `
-                    <div class="playlist-item-title">${track.title}</div>
+                    <div class="playlist-item-title"><a href="${objktUrl}" target="_blank" title="View on Objkt" onclick="event.stopPropagation()">${track.title}</a></div>
                     <div class="playlist-item-artist">${track.artist}</div>
                 `;
+                
+                // Make item clickable to play track (but not the link itself)
+                item.onclick = (e) => {
+                    if (e.target.tagName !== 'A') {
+                        currentTrackIndex = index;
+                        loadTrack(index);
+                        play();
+                        savePlaylistToStorage();
+                    }
+                };
                 
                 item.appendChild(deleteBtn);
                 playlistEl.appendChild(item);
@@ -1558,7 +1592,11 @@
                 audioPlayer.src = track.url;
             }
             
-            document.getElementById('trackTitle').textContent = track.title;
+            // Create Objkt URL
+            const objktUrl = `https://objkt.com/tokens/${track.contract}/${track.tokenId}`;
+            
+            // Make title clickable
+            document.getElementById('trackTitle').innerHTML = `<a href="${objktUrl}" target="_blank" title="View on Objkt">${track.title}</a>`;
             document.getElementById('trackArtist').textContent = track.artist;
             
             updatePlaylist();
