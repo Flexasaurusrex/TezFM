@@ -1128,6 +1128,7 @@
                 <canvas class="mountains" id="mountains"></canvas>
                 <canvas class="visualizer" id="visualizer"></canvas>
                 <div class="pod-display">FM</div>
+                <div class="fullscreen-btn" onclick="enterFullscreen()" title="Fullscreen Visualizer">⛶</div>
             </div>
 
             <!-- Controls below visualizer -->
@@ -1408,11 +1409,18 @@
             
             analyser.getByteFrequencyData(dataArray);
             
-            // Draw mountains first (behind visualizer)
-            drawMountains(mountainsCtx, mountainsCanvas, 1);
+            // Draw on active canvas (small or fullscreen)
+            const activeCtx = isFullscreen ? fsCtx : ctx;
+            const activeCanvas = isFullscreen ? fsCanvas : canvas;
+            const activeMountainsCtx = isFullscreen ? fsMountainsCtx : mountainsCtx;
+            const activeMountainsCanvas = isFullscreen ? fsMountainsCanvas : mountainsCanvas;
+            const scale = isFullscreen ? 3 : 1;
             
-            const width = canvas.width;
-            const height = canvas.height;
+            // Draw mountains first (behind visualizer)
+            drawMountains(activeMountainsCtx, activeMountainsCanvas, scale);
+            
+            const width = activeCanvas.width;
+            const height = activeCanvas.height;
             const centerX = width / 2;
             const centerY = height / 2;
             
@@ -1421,8 +1429,8 @@
             const maxValue = Math.max(...dataArray);
             
             // Clear with fade trail effect
-            ctx.fillStyle = 'rgba(5, 5, 10, 0.15)';
-            ctx.fillRect(0, 0, width, height);
+            activeCtx.fillStyle = 'rgba(5, 5, 10, 0.15)';
+            activeCtx.fillRect(0, 0, width, height);
             
             // Draw outer ring glow
             const glowIntensity = maxValue / 255;
@@ -1491,17 +1499,19 @@
             
             // Clear with fade trail effect
             ctx.fillStyle = 'rgba(5, 5, 10, 0.15)';
+            ctx.fillRect(0, 0, width, height);
             
             // Draw outer ring glow
+            const glowIntensity = maxValue / 255;
             
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, Math.min(width, height) * 0.42, 0, Math.PI * 2);
-            const outerGlow = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, Math.min(width, height) * 0.42);
+            activeCtx.beginPath();
+            activeCtx.arc(centerX, centerY, Math.min(width, height) * 0.42, 0, Math.PI * 2);
+            const outerGlow = activeCtx.createRadialGradient(centerX, centerY, 0, centerX, centerY, Math.min(width, height) * 0.42);
             outerGlow.addColorStop(0, 'transparent');
             outerGlow.addColorStop(0.8, 'transparent');
             outerGlow.addColorStop(1, `rgba(255, 215, 0, ${glowIntensity * 0.3})`);
-            ctx.fillStyle = outerGlow;
-            ctx.fill();
+            activeCtx.fillStyle = outerGlow;
+            activeCtx.fill();
             
             // Only update player body if not in fullscreen
             if (!isFullscreen) {
