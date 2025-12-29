@@ -920,37 +920,70 @@
             }
         }
 
-        // Extract token ID from Objkt URL
+        // Extract token ID and contract from Objkt URL
         function extractTokenId(url) {
+            // Remove trailing slashes and query params
+            url = url.split('?')[0].replace(/\/$/, '');
+            
             const patterns = [
-                /objkt\.com\/asset\/[^\/]+\/(\d+)/,
-                /objkt\.com\/tokens\/[^\/]+\/(\d+)/,
-                /\/(\d+)$/
+                // New Objkt format: objkt.com/asset/CONTRACT/TOKEN
+                {
+                    regex: /objkt\.com\/asset\/([^\/]+)\/(\d+)/,
+                    handler: (match) => ({ contract: match[1], tokenId: match[2] })
+                },
+                // Hic et nunc format: objkt.com/tokens/hicetnunc/TOKEN
+                {
+                    regex: /objkt\.com\/tokens\/hicetnunc\/(\d+)/,
+                    handler: (match) => ({ 
+                        contract: 'KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton', // hic et nunc v2 contract
+                        tokenId: match[1] 
+                    })
+                },
+                // Generic tokens format: objkt.com/tokens/CONTRACT/TOKEN
+                {
+                    regex: /objkt\.com\/tokens\/([^\/]+)\/(\d+)/,
+                    handler: (match) => ({ contract: match[1], tokenId: match[2] })
+                },
+                // Just a number at the end
+                {
+                    regex: /\/(\d+)$/,
+                    handler: (match) => ({ 
+                        contract: 'KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton', // assume hic et nunc
+                        tokenId: match[1] 
+                    })
+                }
             ];
             
             for (let pattern of patterns) {
-                const match = url.match(pattern);
-                if (match) return match[1];
+                const match = url.match(pattern.regex);
+                if (match) {
+                    return pattern.handler(match);
+                }
             }
             return null;
         }
 
         // Fetch NFT metadata from Objkt API
         async function fetchNFTData(url) {
-            const tokenId = extractTokenId(url);
-            if (!tokenId) {
-                throw new Error('Invalid Objkt URL');
+            const tokenInfo = extractTokenId(url);
+            if (!tokenInfo) {
+                throw new Error('Invalid Objkt URL - please use format: objkt.com/tokens/hicetnunc/TOKEN_ID or objkt.com/asset/CONTRACT/TOKEN_ID');
             }
 
+            console.log('Fetching token:', tokenInfo);
+
+            // Query for the token
             const query = `
-                query TokenQuery {
-                    token(where: {token_id: {_eq: "${tokenId}"}}) {
+                query getToken {
+                    token(where: {
+                        fa_contract: {_eq: "${tokenInfo.contract}"},
+                        token_id: {_eq: "${tokenInfo.tokenId}"}
+                    }) {
                         token_id
                         name
-                        description
-                        display_uri
                         artifact_uri
                         mime_type
+                        fa_contract
                         creators {
                             holder {
                                 alias
@@ -961,37 +994,63 @@
                 }
             `;
 
-            const response = await fetch('https://data.objkt.com/v3/graphql', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ query })
-            });
+            try {
+                const response = await fetch('https://data.objkt.com/v3/graphql', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ query })
+                });
 
-            const data = await response.json();
-            
-            if (!data.data || !data.data.token || data.data.token.length === 0) {
-                throw new Error('NFT not found');
+                if (!response.ok) {
+                    throw new Error(`API request failed with status ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                console.log('API response:', data);
+                
+                if (data.errors) {
+                    console.error('GraphQL errors:', data.errors);
+                    throw new Error('GraphQL query failed: ' + JSON.stringify(data.errors));
+                }
+                
+                if (!data.data || !data.data.token || data.data.token.length === 0) {
+                    throw new Error(`NFT not found. Contract: ${tokenInfo.contract}, Token ID: ${tokenInfo.tokenId}`);
+                }
+
+                const token = data.data.token[0];
+                
+                console.log('Token data:', token);
+                
+                if (!token.mime_type || !token.mime_type.includes('audio')) {
+                    throw new Error(`This NFT is not an audio file (mime type: ${token.mime_type || 'unknown'}). Only audio NFTs are supported.`);
+                }
+
+                // Handle IPFS URLs
+                let audioUrl = token.artifact_uri;
+                if (audioUrl.startsWith('ipfs://')) {
+                    audioUrl = audioUrl.replace('ipfs://', 'https://ipfs.io/ipfs/');
+                } else if (audioUrl.startsWith('Qm')) {
+                    audioUrl = 'https://ipfs.io/ipfs/' + audioUrl;
+                }
+
+                const artistName = token.creators && token.creators[0] 
+                    ? (token.creators[0].holder.alias || token.creators[0].holder.address.slice(0, 8) + '...')
+                    : 'Unknown Artist';
+
+                return {
+                    title: token.name || 'Untitled',
+                    artist: artistName,
+                    url: audioUrl,
+                    tokenId: token.token_id,
+                    contract: token.fa_contract
+                };
+            } catch (error) {
+                console.error('Fetch error:', error);
+                throw error;
             }
-
-            const token = data.data.token[0];
-            
-            if (!token.mime_type || !token.mime_type.includes('audio')) {
-                throw new Error('This NFT does not contain audio');
-            }
-
-            const audioUrl = token.artifact_uri.replace('ipfs://', 'https://ipfs.io/ipfs/');
-            const artistName = token.creators && token.creators[0] 
-                ? (token.creators[0].holder.alias || token.creators[0].holder.address.slice(0, 8) + '...')
-                : 'Unknown Artist';
-
-            return {
-                title: token.name || 'Untitled',
-                artist: artistName,
-                url: audioUrl,
-                tokenId: token.token_id
-            };
         }
 
         async function addTrack() {
