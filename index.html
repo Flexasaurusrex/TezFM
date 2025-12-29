@@ -412,16 +412,6 @@
             filter: blur(10px);
         }
 
-        /* Vaporwave mountains canvas */
-        .mountains {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-        }
-
         /* Visualizer canvas */
         .visualizer {
             position: absolute;
@@ -448,160 +438,6 @@
                 0 0 20px rgba(255, 110, 199, 0.8),
                 0 0 40px rgba(255, 110, 199, 0.4);
             letter-spacing: 4px;
-        }
-
-        /* Fullscreen button */
-        .fullscreen-btn {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            width: 30px;
-            height: 30px;
-            background: rgba(255, 215, 0, 0.2);
-            border: 2px solid rgba(255, 215, 0, 0.5);
-            border-radius: 6px;
-            color: #ffd700;
-            font-size: 16px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 3;
-            transition: all 0.3s ease;
-        }
-
-        .fullscreen-btn:hover {
-            background: rgba(255, 215, 0, 0.4);
-            border-color: #ffd700;
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
-        }
-
-        /* Fullscreen mode */
-        .fullscreen-visualizer {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: #000;
-            z-index: 9999;
-            display: none;
-        }
-
-        .fullscreen-visualizer.active {
-            display: block;
-        }
-
-        .fullscreen-canvas {
-            width: 100%;
-            height: 100%;
-        }
-
-        .fullscreen-mountains {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
-
-        .fullscreen-controls {
-            position: absolute;
-            bottom: 40px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            padding: 20px 40px;
-            background: rgba(10, 10, 10, 0.8);
-            border-radius: 60px;
-            border: 2px solid rgba(255, 215, 0, 0.3);
-            backdrop-filter: blur(20px);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
-            z-index: 10;
-        }
-
-        .fullscreen-info {
-            display: flex;
-            flex-direction: column;
-            margin-right: 20px;
-        }
-
-        .fullscreen-title {
-            font-size: 16px;
-            font-weight: 900;
-            color: #00ffcc;
-            margin-bottom: 4px;
-            font-family: 'Orbitron', sans-serif;
-            text-shadow: 0 0 15px rgba(0, 255, 204, 0.8);
-            cursor: pointer;
-        }
-
-        .fullscreen-title:hover {
-            color: #fff;
-        }
-
-        .fullscreen-artist {
-            font-size: 12px;
-            color: #ff6ec7;
-            font-family: 'Orbitron', sans-serif;
-            text-shadow: 0 0 10px rgba(255, 110, 199, 0.6);
-        }
-
-        .fullscreen-control-btn {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(145deg, #2d2d3f, #1a1a2a);
-            border-radius: 50%;
-            border: 3px solid rgba(255, 215, 0, 0.3);
-            color: #00ffcc;
-            font-size: 18px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-        }
-
-        .fullscreen-control-btn:hover {
-            border-color: #ffd700;
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
-            transform: scale(1.1);
-        }
-
-        .fullscreen-control-btn.play {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(145deg, #ff6ec7, #d84fa8);
-            font-size: 22px;
-            color: #fff;
-        }
-
-        .fullscreen-exit {
-            position: absolute;
-            top: 30px;
-            right: 30px;
-            width: 50px;
-            height: 50px;
-            background: rgba(255, 215, 0, 0.2);
-            border: 2px solid rgba(255, 215, 0, 0.5);
-            border-radius: 50%;
-            color: #ffd700;
-            font-size: 24px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 11;
-            transition: all 0.3s ease;
-        }
-
-        .fullscreen-exit:hover {
-            background: rgba(255, 215, 0, 0.4);
-            border-color: #ffd700;
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
         }
 
         /* Control buttons below visualizer */
@@ -1125,7 +961,6 @@
 
             <!-- Control pod with visualizer -->
             <div class="control-pod">
-                <canvas class="mountains" id="mountains"></canvas>
                 <canvas class="visualizer" id="visualizer"></canvas>
                 <div class="pod-display">FM</div>
             </div>
@@ -1164,24 +999,6 @@
             <div class="playlist" id="playlist"></div>
 
             <div class="status" id="status">Playlist empty</div>
-        </div>
-    </div>
-
-    <!-- Fullscreen Visualizer Mode -->
-    <div class="fullscreen-visualizer" id="fullscreenViz">
-        <canvas class="fullscreen-mountains" id="fullscreenMountains"></canvas>
-        <canvas class="fullscreen-canvas" id="fullscreenCanvas"></canvas>
-        
-        <div class="fullscreen-exit" onclick="exitFullscreen()">✕</div>
-        
-        <div class="fullscreen-controls">
-            <div class="fullscreen-info">
-                <div class="fullscreen-title" id="fsTitle" onclick="openCurrentObjkt()">Ready to play</div>
-                <div class="fullscreen-artist" id="fsArtist">Add Objkt NFT link</div>
-            </div>
-            <button class="fullscreen-control-btn" onclick="previousTrack()">⏮</button>
-            <button class="fullscreen-control-btn play" onclick="togglePlay()" id="fsPlayBtn">▶</button>
-            <button class="fullscreen-control-btn" onclick="nextTrack()">⏭</button>
         </div>
     </div>
 
@@ -1239,62 +1056,20 @@
         // Audio visualizer setup
         const canvas = document.getElementById('visualizer');
         const ctx = canvas.getContext('2d');
-        const mountainsCanvas = document.getElementById('mountains');
-        const mountainsCtx = mountainsCanvas.getContext('2d');
         let audioContext;
         let analyser;
         let dataArray;
         let bufferLength;
         let animationId;
-        let isFullscreen = false;
 
-        // Fullscreen canvases
-        const fsCanvas = document.getElementById('fullscreenCanvas');
-        const fsCtx = fsCanvas.getContext('2d');
-        const fsMountainsCanvas = document.getElementById('fullscreenMountains');
-        const fsMountainsCtx = fsMountainsCanvas.getContext('2d');
-
-        // Set canvas sizes
+        // Set canvas size
         function resizeCanvas() {
             const pod = document.querySelector('.control-pod');
             canvas.width = pod.offsetWidth;
             canvas.height = pod.offsetHeight;
-            mountainsCanvas.width = pod.offsetWidth;
-            mountainsCanvas.height = pod.offsetHeight;
         }
         resizeCanvas();
         window.addEventListener('resize', resizeCanvas);
-
-        // Fullscreen functions
-        function enterFullscreen() {
-            isFullscreen = true;
-            document.getElementById('fullscreenViz').classList.add('active');
-            fsCanvas.width = window.innerWidth;
-            fsCanvas.height = window.innerHeight;
-            fsMountainsCanvas.width = window.innerWidth;
-            fsMountainsCanvas.height = window.innerHeight;
-            updateFullscreenInfo();
-        }
-
-        function exitFullscreen() {
-            isFullscreen = false;
-            document.getElementById('fullscreenViz').classList.remove('active');
-        }
-
-        function updateFullscreenInfo() {
-            if (currentTrackIndex >= 0 && currentTrackIndex < playlist.length) {
-                const track = playlist[currentTrackIndex];
-                document.getElementById('fsTitle').textContent = track.title;
-                document.getElementById('fsArtist').textContent = track.artist;
-            }
-        }
-
-        function openCurrentObjkt() {
-            if (currentTrackIndex >= 0 && currentTrackIndex < playlist.length) {
-                const track = playlist[currentTrackIndex];
-                window.open(`https://objkt.com/tokens/${track.contract}/${track.tokenId}`, '_blank');
-            }
-        }
 
         // Initialize audio context and analyser
         function initAudioContext() {
@@ -1319,84 +1094,6 @@
             }
         }
 
-        // Draw vaporwave mountains that react to audio
-        function drawMountains(targetCtx, targetCanvas, scale = 1) {
-            if (!analyser) return;
-            
-            const width = targetCanvas.width;
-            const height = targetCanvas.height;
-            
-            // Clear canvas
-            targetCtx.fillStyle = 'transparent';
-            targetCtx.clearRect(0, 0, width, height);
-            
-            // Draw multiple mountain layers
-            const layers = 4;
-            const bassRange = dataArray.slice(0, 16);
-            const avgBass = bassRange.reduce((a, b) => a + b, 0) / bassRange.length;
-            
-            for (let layer = 0; layer < layers; layer++) {
-                const layerHeight = height * 0.6;
-                const baseY = height * 0.7 + (layer * 15 * scale);
-                const points = 40;
-                
-                targetCtx.beginPath();
-                targetCtx.moveTo(0, height);
-                
-                // Draw mountain peaks
-                for (let i = 0; i <= points; i++) {
-                    const x = (width / points) * i;
-                    const dataIndex = Math.floor((i / points) * 16);
-                    const value = bassRange[dataIndex] || 0;
-                    
-                    // Create mountain peaks that react to bass
-                    const peakHeight = (value / 255) * layerHeight * (1 - layer * 0.2);
-                    const y = baseY - peakHeight;
-                    
-                    targetCtx.lineTo(x, y);
-                }
-                
-                targetCtx.lineTo(width, height);
-                targetCtx.closePath();
-                
-                // Create gradient for each mountain layer
-                const gradient = targetCtx.createLinearGradient(0, baseY - layerHeight, 0, height);
-                
-                // Color scheme: pink -> purple -> cyan based on layer
-                if (layer === 0) {
-                    gradient.addColorStop(0, `rgba(255, 110, 199, ${0.8 - layer * 0.15})`);
-                    gradient.addColorStop(0.5, `rgba(255, 110, 199, ${0.4 - layer * 0.1})`);
-                    gradient.addColorStop(1, 'transparent');
-                } else if (layer === 1) {
-                    gradient.addColorStop(0, `rgba(180, 100, 255, ${0.7 - layer * 0.15})`);
-                    gradient.addColorStop(0.5, `rgba(180, 100, 255, ${0.3 - layer * 0.1})`);
-                    gradient.addColorStop(1, 'transparent');
-                } else if (layer === 2) {
-                    gradient.addColorStop(0, `rgba(120, 115, 245, ${0.6 - layer * 0.15})`);
-                    gradient.addColorStop(0.5, `rgba(120, 115, 245, ${0.2 - layer * 0.1})`);
-                    gradient.addColorStop(1, 'transparent');
-                } else {
-                    gradient.addColorStop(0, `rgba(0, 255, 204, ${0.5 - layer * 0.15})`);
-                    gradient.addColorStop(0.5, `rgba(0, 255, 204, ${0.1 - layer * 0.05})`);
-                    gradient.addColorStop(1, 'transparent');
-                }
-                
-                targetCtx.fillStyle = gradient;
-                targetCtx.fill();
-                
-                // Add glow to mountain peaks
-                targetCtx.strokeStyle = gradient;
-                targetCtx.lineWidth = 2 * scale;
-                targetCtx.shadowBlur = 15 * scale;
-                targetCtx.shadowColor = layer === 0 ? 'rgba(255, 110, 199, 0.8)' : 
-                                       layer === 1 ? 'rgba(180, 100, 255, 0.8)' :
-                                       layer === 2 ? 'rgba(120, 115, 245, 0.8)' :
-                                       'rgba(0, 255, 204, 0.8)';
-                targetCtx.stroke();
-                targetCtx.shadowBlur = 0;
-            }
-        }
-
         // Retrowave visualizer animation - BADASS VERSION
         let lastPulseTime = 0;
         const pulseThreshold = 100; // Minimum ms between pulses
@@ -1408,9 +1105,6 @@
             
             analyser.getByteFrequencyData(dataArray);
             
-            // Draw mountains first (behind visualizer)
-            drawMountains(mountainsCtx, mountainsCanvas, 1);
-            
             const width = canvas.width;
             const height = canvas.height;
             const centerX = width / 2;
@@ -1420,12 +1114,7 @@
             const avgValue = dataArray.reduce((a, b) => a + b, 0) / bufferLength;
             const maxValue = Math.max(...dataArray);
             
-            // Clear with fade trail effect
-            ctx.fillStyle = 'rgba(5, 5, 10, 0.15)';
-            ctx.fillRect(0, 0, width, height);
-            
-            // Draw outer ring glow
-            const glowIntensity = maxValue / 255;
+            // Make the entire player body pulse with audio
             const walkmanEl = document.querySelector('.walkman');
             const walkmanGlow = document.querySelector('.walkman-glow');
             const now = Date.now();
@@ -1491,8 +1180,10 @@
             
             // Clear with fade trail effect
             ctx.fillStyle = 'rgba(5, 5, 10, 0.15)';
+            ctx.fillRect(0, 0, width, height);
             
             // Draw outer ring glow
+            const glowIntensity = maxValue / 255;
             
             ctx.beginPath();
             ctx.arc(centerX, centerY, Math.min(width, height) * 0.42, 0, Math.PI * 2);
@@ -1503,9 +1194,7 @@
             ctx.fillStyle = outerGlow;
             ctx.fill();
             
-            // Only update player body if not in fullscreen
-            if (!isFullscreen) {
-                // Make the entire player body pulse with audio
+            // Draw circular bars (retrowave style) - MORE BARS
             const bars = 64;
             const radius = Math.min(width, height) * 0.32;
             
