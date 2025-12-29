@@ -1128,7 +1128,6 @@
                 <canvas class="mountains" id="mountains"></canvas>
                 <canvas class="visualizer" id="visualizer"></canvas>
                 <div class="pod-display">FM</div>
-                <div class="fullscreen-btn" onclick="enterFullscreen()" title="Fullscreen Visualizer">⛶</div>
             </div>
 
             <!-- Controls below visualizer -->
@@ -1409,18 +1408,11 @@
             
             analyser.getByteFrequencyData(dataArray);
             
-            // Draw on active canvas (small or fullscreen)
-            const activeCtx = isFullscreen ? fsCtx : ctx;
-            const activeCanvas = isFullscreen ? fsCanvas : canvas;
-            const activeMountainsCtx = isFullscreen ? fsMountainsCtx : mountainsCtx;
-            const activeMountainsCanvas = isFullscreen ? fsMountainsCanvas : mountainsCanvas;
-            const scale = isFullscreen ? 3 : 1;
-            
             // Draw mountains first (behind visualizer)
-            drawMountains(activeMountainsCtx, activeMountainsCanvas, scale);
+            drawMountains(mountainsCtx, mountainsCanvas, 1);
             
-            const width = activeCanvas.width;
-            const height = activeCanvas.height;
+            const width = canvas.width;
+            const height = canvas.height;
             const centerX = width / 2;
             const centerY = height / 2;
             
@@ -1429,8 +1421,8 @@
             const maxValue = Math.max(...dataArray);
             
             // Clear with fade trail effect
-            activeCtx.fillStyle = 'rgba(5, 5, 10, 0.15)';
-            activeCtx.fillRect(0, 0, width, height);
+            ctx.fillStyle = 'rgba(5, 5, 10, 0.15)';
+            ctx.fillRect(0, 0, width, height);
             
             // Draw outer ring glow
             const glowIntensity = maxValue / 255;
@@ -1498,91 +1490,26 @@
             }
             
             // Clear with fade trail effect
-            activeCtx.fillStyle = 'rgba(5, 5, 10, 0.15)';
+            ctx.fillStyle = 'rgba(5, 5, 10, 0.15)';
             ctx.fillRect(0, 0, width, height);
             
             // Draw outer ring glow
             const glowIntensity = maxValue / 255;
             
-            activeCtx.beginPath();
-            activeCtx.arc(centerX, centerY, Math.min(width, height) * 0.42, 0, Math.PI * 2);
-            const outerGlow = activeCtx.createRadialGradient(centerX, centerY, 0, centerX, centerY, Math.min(width, height) * 0.42);
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, Math.min(width, height) * 0.42, 0, Math.PI * 2);
+            const outerGlow = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, Math.min(width, height) * 0.42);
             outerGlow.addColorStop(0, 'transparent');
             outerGlow.addColorStop(0.8, 'transparent');
             outerGlow.addColorStop(1, `rgba(255, 215, 0, ${glowIntensity * 0.3})`);
-            activeCtx.fillStyle = outerGlow;
-            activeCtx.fill();
+            ctx.fillStyle = outerGlow;
+            ctx.fill();
             
             // Only update player body if not in fullscreen
             if (!isFullscreen) {
                 // Make the entire player body pulse with audio
-                const walkmanEl = document.querySelector('.walkman');
-                const walkmanGlow = document.querySelector('.walkman-glow');
-                const now = Date.now();
-                
-                // Continuously update grid based on audio - ALWAYS REACTIVE
-                const bassIntensity = Math.max(...dataArray.slice(0, 8)) / 255; // Low frequencies
-                const midIntensity = Math.max(...dataArray.slice(8, 32)) / 255; // Mid frequencies
-                const highIntensity = Math.max(...dataArray.slice(32, 64)) / 255; // High frequencies
-                
-                // Grid gets MUCH brighter and scales dramatically with bass
-                const gridOpacity = 0.4 + (bassIntensity * 0.6); // 0.4 to 1.0
-                const gridScale = 2 + (bassIntensity * 0.8); // 2.0 to 2.8
-                const backgroundGlowIntensity = 0.12 + (avgValue / 255) * 0.3; // 0.12 to 0.42
-                
-                // Update CSS variables for smooth transitions
-                walkmanEl.style.setProperty('--grid-opacity', gridOpacity);
-                walkmanEl.style.setProperty('--grid-scale', gridScale);
-                if (walkmanGlow) {
-                    walkmanGlow.style.setProperty('--glow-intensity', backgroundGlowIntensity);
-                }
-                
-                // Speed up grid animation on bass hits
-                if (bassIntensity > 0.6) {
-                    walkmanEl.style.setProperty('--grid-speed', '4s');
-                } else {
-                    walkmanEl.style.setProperty('--grid-speed', '8s');
-                }
-                
-                if (maxValue > 180 && (now - lastPulseTime) > pulseThreshold) {
-                    walkmanEl.classList.add('audio-react');
-                    
-                    // Dynamic border glow based on audio intensity
-                    const intensity = maxValue / 255;
-                    walkmanEl.style.borderColor = `rgba(255, 215, 0, ${0.3 + intensity * 0.7})`;
-                    walkmanEl.style.boxShadow = `
-                        0 30px 80px rgba(0, 0, 0, 0.8),
-                        0 15px 40px rgba(255, 215, 0, ${0.2 + intensity * 0.6}),
-                        0 0 ${40 + intensity * 60}px rgba(255, 215, 0, ${intensity * 0.8}),
-                        0 0 ${80 + intensity * 120}px rgba(255, 110, 199, ${intensity * 0.4}),
-                        inset 0 -8px 25px rgba(0, 0, 0, 0.6),
-                        inset 0 8px 25px rgba(255, 215, 0, ${0.1 + intensity * 0.3}),
-                        inset 2px 0 15px rgba(255, 215, 0, ${0.15 + intensity * 0.2}),
-                        inset -2px 0 15px rgba(255, 110, 199, ${0.1 + intensity * 0.2})
-                    `;
-                    
-                    setTimeout(() => {
-                        walkmanEl.classList.remove('audio-react');
-                    }, 100);
-                    
-                    lastPulseTime = now;
-                } else if (maxValue < 100) {
-                    // Reset to normal when quiet
-                    walkmanEl.style.borderColor = 'rgba(255, 215, 0, 0.3)';
-                    walkmanEl.style.boxShadow = `
-                        0 30px 80px rgba(0, 0, 0, 0.8),
-                        0 15px 40px rgba(255, 215, 0, 0.2),
-                        inset 0 -8px 25px rgba(0, 0, 0, 0.6),
-                        inset 0 8px 25px rgba(255, 215, 0, 0.1),
-                        inset 2px 0 15px rgba(255, 215, 0, 0.15),
-                        inset -2px 0 15px rgba(255, 110, 199, 0.1)
-                    `;
-                }
-            }
-            
-            // Draw circular bars (works for both normal and fullscreen)
             const bars = 64;
-            const radius = Math.min(width, height) * 0.32 * (isFullscreen ? 0.4 : 1);
+            const radius = Math.min(width, height) * 0.32;
             
             for (let i = 0; i < bars; i++) {
                 const angle = (Math.PI * 2 * i) / bars - Math.PI / 2;
@@ -1597,7 +1524,7 @@
                 const y2 = centerY + Math.sin(angle) * (radius + barHeight);
                 
                 // Create gradient for each bar - YELLOW/PINK/PURPLE theme
-                const gradient = activeCtx.createLinearGradient(x1, y1, x2, y2);
+                const gradient = ctx.createLinearGradient(x1, y1, x2, y2);
                 
                 // Color distribution based on frequency
                 if (i < bars / 4) {
@@ -1623,30 +1550,30 @@
                 }
                 
                 // Draw bar with varying thickness based on amplitude
-                activeCtx.beginPath();
-                activeCtx.strokeStyle = gradient;
-                activeCtx.lineWidth = 3 + (value / 255) * 2;
-                activeCtx.lineCap = 'round';
-                activeCtx.moveTo(x1, y1);
-                activeCtx.lineTo(x2, y2);
-                activeCtx.stroke();
+                ctx.beginPath();
+                ctx.strokeStyle = gradient;
+                ctx.lineWidth = 3 + (value / 255) * 2;
+                ctx.lineCap = 'round';
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.stroke();
                 
                 // Add intense glow effect
-                activeCtx.shadowBlur = 20 + (value / 255) * 20;
-                activeCtx.shadowColor = gradient;
-                activeCtx.stroke();
-                activeCtx.shadowBlur = 0;
+                ctx.shadowBlur = 20 + (value / 255) * 20;
+                ctx.shadowColor = gradient;
+                ctx.stroke();
+                ctx.shadowBlur = 0;
                 
                 // Add particle effects at bar tips for high values
                 if (value > 200) {
-                    activeCtx.beginPath();
-                    activeCtx.arc(x2, y2, 2, 0, Math.PI * 2);
-                    activeCtx.fillStyle = `rgba(255, 255, 255, ${(value - 200) / 55})`;
-                    activeCtx.fill();
-                    activeCtx.shadowBlur = 10;
-                    activeCtx.shadowColor = '#fff';
-                    activeCtx.fill();
-                    activeCtx.shadowBlur = 0;
+                    ctx.beginPath();
+                    ctx.arc(x2, y2, 2, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255, 255, 255, ${(value - 200) / 55})`;
+                    ctx.fill();
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = '#fff';
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
                 }
             }
             
@@ -1654,8 +1581,8 @@
             const pulseRadius = radius * 0.25 + (avgValue / 255) * 15;
             
             for (let i = 0; i < 3; i++) {
-                activeCtx.beginPath();
-                activeCtx.arc(centerX, centerY, pulseRadius - i * 8, 0, Math.PI * 2);
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, pulseRadius - i * 8, 0, Math.PI * 2);
                 const ringGradient = ctx.createRadialGradient(
                     centerX, centerY, pulseRadius - i * 8 - 5,
                     centerX, centerY, pulseRadius - i * 8 + 5
@@ -1663,37 +1590,37 @@
                 ringGradient.addColorStop(0, 'transparent');
                 ringGradient.addColorStop(0.5, `rgba(255, 215, 0, ${(1 - i * 0.3) * (avgValue / 255) * 0.5})`);
                 ringGradient.addColorStop(1, 'transparent');
-                activeCtx.strokeStyle = ringGradient;
-                activeCtx.lineWidth = 2;
-                activeCtx.stroke();
+                ctx.strokeStyle = ringGradient;
+                ctx.lineWidth = 2;
+                ctx.stroke();
             }
             
             // Draw center circle with reactive glow
-            activeCtx.beginPath();
-            activeCtx.arc(centerX, centerY, radius * 0.2, 0, Math.PI * 2);
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius * 0.2, 0, Math.PI * 2);
             const centerGradient = ctx.createRadialGradient(
                 centerX - 10, centerY - 10, 0,
                 centerX, centerY, radius * 0.2
             );
             centerGradient.addColorStop(0, 'rgba(20, 20, 30, 0.95)');
             centerGradient.addColorStop(1, 'rgba(5, 5, 10, 0.98)');
-            activeCtx.fillStyle = centerGradient;
-            activeCtx.fill();
+            ctx.fillStyle = centerGradient;
+            ctx.fill();
             
             // Outer rim of center circle
-            activeCtx.strokeStyle = `rgba(255, 215, 0, ${0.4 + (avgValue / 255) * 0.6})`;
-            activeCtx.lineWidth = 2;
-            activeCtx.shadowBlur = 15;
-            activeCtx.shadowColor = 'rgba(255, 215, 0, 0.8)';
-            activeCtx.stroke();
-            activeCtx.shadowBlur = 0;
+            ctx.strokeStyle = `rgba(255, 215, 0, ${0.4 + (avgValue / 255) * 0.6})`;
+            ctx.lineWidth = 2;
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = 'rgba(255, 215, 0, 0.8)';
+            ctx.stroke();
+            ctx.shadowBlur = 0;
             
             // Inner accent ring
-            activeCtx.beginPath();
-            activeCtx.arc(centerX, centerY, radius * 0.18, 0, Math.PI * 2);
-            activeCtx.strokeStyle = `rgba(255, 110, 199, ${0.2 + (avgValue / 255) * 0.4})`;
-            activeCtx.lineWidth = 1;
-            activeCtx.stroke();
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius * 0.18, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(255, 110, 199, ${0.2 + (avgValue / 255) * 0.4})`;
+            ctx.lineWidth = 1;
+            ctx.stroke();
         }
 
         // Start visualizer
@@ -1985,9 +1912,6 @@
             document.getElementById('trackTitle').innerHTML = `<a href="${objktUrl}" target="_blank" title="View on Objkt">${track.title}</a>`;
             document.getElementById('trackArtist').textContent = track.artist;
             
-            // Update fullscreen info if active
-            updateFullscreenInfo();
-            
             updatePlaylist();
             savePlaylistToStorage(); // Save current track position
         }
@@ -2002,12 +1926,6 @@
                 pause();
             } else {
                 play();
-            }
-            
-            // Update fullscreen button too
-            const fsPlayBtn = document.getElementById('fsPlayBtn');
-            if (fsPlayBtn) {
-                fsPlayBtn.innerHTML = isPlaying ? '⏸' : '▶';
             }
         }
 
