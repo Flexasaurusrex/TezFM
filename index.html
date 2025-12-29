@@ -640,6 +640,7 @@
             transition: all 0.3s ease;
             border-left: 4px solid transparent;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+            position: relative;
         }
 
         .playlist-item:hover {
@@ -665,6 +666,7 @@
             margin-bottom: 4px;
             font-family: 'Orbitron', sans-serif;
             text-shadow: 0 0 10px rgba(0, 255, 204, 0.6);
+            padding-right: 25px;
         }
 
         .playlist-item-artist {
@@ -673,6 +675,36 @@
             font-weight: 600;
             font-family: 'Orbitron', sans-serif;
             text-shadow: 0 0 8px rgba(255, 110, 199, 0.5);
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 20px;
+            height: 20px;
+            background: rgba(255, 0, 80, 0.8);
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            opacity: 0;
+            transition: all 0.2s ease;
+            line-height: 1;
+            font-family: Arial, sans-serif;
+        }
+
+        .playlist-item:hover .delete-btn {
+            opacity: 1;
+        }
+
+        .delete-btn:hover {
+            background: rgba(255, 0, 80, 1);
+            transform: scale(1.1);
         }
 
         .loading {
@@ -797,6 +829,44 @@
         const audioPlayer = document.getElementById('audioPlayer');
         const playBtn = document.getElementById('playBtn');
         const progressBar = document.getElementById('progressBar');
+
+        // LocalStorage key
+        const STORAGE_KEY = 'tezos_walkman_playlist';
+
+        // Load playlist from localStorage on page load
+        function loadPlaylistFromStorage() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    playlist = data.playlist || [];
+                    currentTrackIndex = data.currentTrackIndex || -1;
+                    
+                    if (playlist.length > 0) {
+                        updatePlaylist();
+                        if (currentTrackIndex >= 0 && currentTrackIndex < playlist.length) {
+                            loadTrack(currentTrackIndex);
+                        }
+                        updateStatus();
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading playlist from storage:', error);
+            }
+        }
+
+        // Save playlist to localStorage
+        function savePlaylistToStorage() {
+            try {
+                const data = {
+                    playlist: playlist,
+                    currentTrackIndex: currentTrackIndex
+                };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            } catch (error) {
+                console.error('Error saving playlist to storage:', error);
+            }
+        }
 
         // Audio visualizer setup
         const canvas = document.getElementById('visualizer');
@@ -1077,6 +1147,7 @@
                 }
                 
                 updateStatus();
+                savePlaylistToStorage(); // Save to localStorage
             } catch (error) {
                 alert('Error loading track: ' + error.message);
                 console.error(error);
@@ -1096,6 +1167,16 @@
                     currentTrackIndex = index;
                     loadTrack(index);
                     play();
+                    savePlaylistToStorage(); // Save current track
+                };
+                
+                // Add delete button
+                const deleteBtn = document.createElement('span');
+                deleteBtn.innerHTML = '✕';
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    removeTrack(index);
                 };
                 
                 item.innerHTML = `
@@ -1103,8 +1184,34 @@
                     <div class="playlist-item-artist">${track.artist}</div>
                 `;
                 
+                item.appendChild(deleteBtn);
                 playlistEl.appendChild(item);
             });
+        }
+
+        function removeTrack(index) {
+            if (confirm('Remove this track from playlist?')) {
+                playlist.splice(index, 1);
+                
+                // Update current track index
+                if (currentTrackIndex === index) {
+                    if (playlist.length > 0) {
+                        currentTrackIndex = Math.min(currentTrackIndex, playlist.length - 1);
+                        loadTrack(currentTrackIndex);
+                    } else {
+                        currentTrackIndex = -1;
+                        document.getElementById('trackTitle').textContent = 'Ready to play';
+                        document.getElementById('trackArtist').textContent = 'Add Objkt NFT link to begin';
+                        pause();
+                    }
+                } else if (index < currentTrackIndex) {
+                    currentTrackIndex--;
+                }
+                
+                updatePlaylist();
+                updateStatus();
+                savePlaylistToStorage();
+            }
         }
 
         function loadTrack(index) {
@@ -1117,6 +1224,7 @@
             document.getElementById('trackArtist').textContent = track.artist;
             
             updatePlaylist();
+            savePlaylistToStorage(); // Save current track position
         }
 
         function togglePlay() {
@@ -1204,6 +1312,9 @@
                 addTrack();
             }
         });
+
+        // Load saved playlist on page load
+        loadPlaylistFromStorage();
 
         // Start visualizer even when paused for aesthetic
         drawVisualizer();
