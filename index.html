@@ -1042,19 +1042,23 @@
 
             console.log('Fetching token:', tokenInfo);
 
-            // Query for the token
+            // Query for the token using correct v3 API schema
             const query = `
                 query getToken {
                     token(where: {
                         fa_contract: {_eq: "${tokenInfo.contract}"},
                         token_id: {_eq: "${tokenInfo.tokenId}"}
                     }) {
+                        pk
                         token_id
                         name
                         artifact_uri
-                        mime_type
+                        display_uri
+                        mime
+                        description
                         fa_contract
                         creators {
+                            creator_address
                             holder {
                                 alias
                                 address
@@ -1094,20 +1098,26 @@
                 
                 console.log('Token data:', token);
                 
-                if (!token.mime_type || !token.mime_type.includes('audio')) {
-                    throw new Error(`This NFT is not an audio file (mime type: ${token.mime_type || 'unknown'}). Only audio NFTs are supported.`);
+                // Check if it's an audio file using the mime field
+                if (!token.mime || !token.mime.includes('audio')) {
+                    throw new Error(`This NFT is not an audio file (mime type: ${token.mime || 'unknown'}). Only audio NFTs are supported.`);
                 }
 
                 // Handle IPFS URLs
                 let audioUrl = token.artifact_uri;
+                if (!audioUrl) {
+                    throw new Error('No artifact URI found for this NFT');
+                }
+                
                 if (audioUrl.startsWith('ipfs://')) {
                     audioUrl = audioUrl.replace('ipfs://', 'https://ipfs.io/ipfs/');
                 } else if (audioUrl.startsWith('Qm')) {
                     audioUrl = 'https://ipfs.io/ipfs/' + audioUrl;
                 }
 
+                // Get artist name from creators
                 const artistName = token.creators && token.creators[0] 
-                    ? (token.creators[0].holder.alias || token.creators[0].holder.address.slice(0, 8) + '...')
+                    ? (token.creators[0].holder?.alias || token.creators[0].holder?.address?.slice(0, 8) + '...' || token.creators[0].creator_address?.slice(0, 8) + '...')
                     : 'Unknown Artist';
 
                 return {
