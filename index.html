@@ -119,6 +119,7 @@
             overflow: hidden;
         }
 
+        /* Animated vaporwave grid INSIDE the player */
         .walkman::before {
             content: '';
             position: absolute;
@@ -127,15 +128,49 @@
             right: 0;
             bottom: 0;
             background: 
-                linear-gradient(145deg, 
-                    rgba(255, 215, 0, 0.1) 0%, 
-                    transparent 30%, 
-                    rgba(255, 110, 199, 0.05) 70%, 
-                    transparent 100%
-                );
+                linear-gradient(0deg, transparent 24%, rgba(255, 215, 0, 0.12) 25%, rgba(255, 215, 0, 0.12) 26%, transparent 27%, transparent 74%, rgba(255, 215, 0, 0.12) 75%, rgba(255, 215, 0, 0.12) 76%, transparent 77%, transparent),
+                linear-gradient(90deg, transparent 24%, rgba(255, 110, 199, 0.1) 25%, rgba(255, 110, 199, 0.1) 26%, transparent 27%, transparent 74%, rgba(255, 110, 199, 0.1) 75%, rgba(255, 110, 199, 0.1) 76%, transparent 77%, transparent);
+            background-size: 40px 40px;
+            background-position: 0 0;
+            transform: perspective(400px) rotateX(50deg) scale(1.5) translateY(-50px);
+            transform-origin: center center;
+            animation: innerGridMove 15s linear infinite, gridPulse 3s ease-in-out infinite;
+            opacity: 0.3;
             border-radius: 28px;
             pointer-events: none;
             z-index: 0;
+        }
+
+        @keyframes innerGridMove {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 40px; }
+        }
+
+        @keyframes gridPulse {
+            0%, 100% { opacity: 0.25; }
+            50% { opacity: 0.4; }
+        }
+
+        /* Radiant glow layer */
+        .walkman-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            transform: translate(-50%, -50%);
+            background: 
+                radial-gradient(ellipse at center, rgba(255, 215, 0, 0.08) 0%, transparent 60%),
+                radial-gradient(ellipse at center, rgba(255, 110, 199, 0.05) 20%, transparent 70%);
+            border-radius: 28px;
+            pointer-events: none;
+            z-index: 0;
+            animation: glowPulse 4s ease-in-out infinite;
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
         }
 
         /* Audio reactive glow layer */
@@ -865,6 +900,9 @@
 <body>
     <div class="container">
         <div class="walkman">
+            <!-- Glow layer -->
+            <div class="walkman-glow"></div>
+            
             <!-- Logo -->
             <div class="logo">TEZOS</div>
 
@@ -1052,6 +1090,12 @@
                     inset -2px 0 15px rgba(255, 110, 199, ${0.1 + intensity * 0.2})
                 `;
                 
+                // Make internal grid react
+                const gridIntensity = 0.25 + (intensity * 0.3);
+                const gridScale = 1.5 + (intensity * 0.2);
+                walkmanEl.style.setProperty('--grid-opacity', gridIntensity);
+                walkmanEl.style.setProperty('--grid-scale', gridScale);
+                
                 setTimeout(() => {
                     walkmanEl.classList.remove('audio-react');
                 }, 100);
@@ -1069,6 +1113,10 @@
                     inset -2px 0 15px rgba(255, 110, 199, 0.1)
                 `;
             }
+            
+            // Continuously update grid based on average audio
+            const gridOpacity = 0.25 + (avgValue / 255) * 0.2;
+            walkmanEl.style.setProperty('--grid-opacity', gridOpacity);
             
             // Clear with fade trail effect
             ctx.fillStyle = 'rgba(5, 5, 10, 0.15)';
