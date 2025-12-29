@@ -128,27 +128,34 @@
             right: 0;
             bottom: 0;
             background: 
-                linear-gradient(0deg, transparent 24%, rgba(255, 215, 0, 0.12) 25%, rgba(255, 215, 0, 0.12) 26%, transparent 27%, transparent 74%, rgba(255, 215, 0, 0.12) 75%, rgba(255, 215, 0, 0.12) 76%, transparent 77%, transparent),
-                linear-gradient(90deg, transparent 24%, rgba(255, 110, 199, 0.1) 25%, rgba(255, 110, 199, 0.1) 26%, transparent 27%, transparent 74%, rgba(255, 110, 199, 0.1) 75%, rgba(255, 110, 199, 0.1) 76%, transparent 77%, transparent);
-            background-size: 40px 40px;
+                linear-gradient(0deg, transparent 24%, rgba(255, 215, 0, 0.25) 25%, rgba(255, 215, 0, 0.25) 26%, transparent 27%, transparent 74%, rgba(255, 215, 0, 0.25) 75%, rgba(255, 215, 0, 0.25) 76%, transparent 77%, transparent),
+                linear-gradient(90deg, transparent 24%, rgba(255, 110, 199, 0.2) 25%, rgba(255, 110, 199, 0.2) 26%, transparent 27%, transparent 74%, rgba(255, 110, 199, 0.2) 75%, rgba(255, 110, 199, 0.2) 76%, transparent 77%, transparent);
+            background-size: 35px 35px;
             background-position: 0 0;
-            transform: perspective(400px) rotateX(50deg) scale(1.5) translateY(-50px);
+            transform: perspective(300px) rotateX(55deg) scale(2) translateY(-80px);
             transform-origin: center center;
-            animation: innerGridMove 15s linear infinite, gridPulse 3s ease-in-out infinite;
-            opacity: 0.3;
+            animation: innerGridMove 8s linear infinite, gridPulse 2s ease-in-out infinite;
+            opacity: var(--grid-opacity, 0.5);
             border-radius: 28px;
             pointer-events: none;
             z-index: 0;
+            filter: blur(0.3px);
         }
 
         @keyframes innerGridMove {
             0% { background-position: 0 0; }
-            100% { background-position: 0 40px; }
+            100% { background-position: 0 35px; }
         }
 
         @keyframes gridPulse {
-            0%, 100% { opacity: 0.25; }
-            50% { opacity: 0.4; }
+            0%, 100% { 
+                opacity: var(--grid-opacity, 0.5);
+                transform: perspective(300px) rotateX(55deg) scale(var(--grid-scale, 2)) translateY(-80px);
+            }
+            50% { 
+                opacity: calc(var(--grid-opacity, 0.5) * 1.3);
+                transform: perspective(300px) rotateX(55deg) scale(calc(var(--grid-scale, 2) * 1.05)) translateY(-80px);
+            }
         }
 
         /* Radiant glow layer */
@@ -160,17 +167,23 @@
             height: 100%;
             transform: translate(-50%, -50%);
             background: 
-                radial-gradient(ellipse at center, rgba(255, 215, 0, 0.08) 0%, transparent 60%),
-                radial-gradient(ellipse at center, rgba(255, 110, 199, 0.05) 20%, transparent 70%);
+                radial-gradient(ellipse at center, rgba(255, 215, 0, var(--glow-intensity, 0.15)) 0%, transparent 60%),
+                radial-gradient(ellipse at center, rgba(255, 110, 199, var(--glow-intensity, 0.1)) 20%, transparent 70%);
             border-radius: 28px;
             pointer-events: none;
             z-index: 0;
-            animation: glowPulse 4s ease-in-out infinite;
+            animation: glowPulse 2s ease-in-out infinite;
         }
 
         @keyframes glowPulse {
-            0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
-            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+            0%, 100% { 
+                opacity: 1; 
+                transform: translate(-50%, -50%) scale(1);
+            }
+            50% { 
+                opacity: 1.3; 
+                transform: translate(-50%, -50%) scale(1.08);
+            }
         }
 
         /* Audio reactive glow layer */
@@ -1071,7 +1084,32 @@
             
             // Make the entire player body pulse with audio
             const walkmanEl = document.querySelector('.walkman');
+            const walkmanGlow = document.querySelector('.walkman-glow');
             const now = Date.now();
+            
+            // Continuously update grid based on audio - ALWAYS REACTIVE
+            const bassIntensity = Math.max(...dataArray.slice(0, 8)) / 255; // Low frequencies
+            const midIntensity = Math.max(...dataArray.slice(8, 32)) / 255; // Mid frequencies
+            const highIntensity = Math.max(...dataArray.slice(32, 64)) / 255; // High frequencies
+            
+            // Grid gets MUCH brighter and scales dramatically with bass
+            const gridOpacity = 0.4 + (bassIntensity * 0.6); // 0.4 to 1.0
+            const gridScale = 2 + (bassIntensity * 0.8); // 2.0 to 2.8
+            const glowIntensity = 0.12 + (avgValue / 255) * 0.3; // 0.12 to 0.42
+            
+            // Update CSS variables for smooth transitions
+            walkmanEl.style.setProperty('--grid-opacity', gridOpacity);
+            walkmanEl.style.setProperty('--grid-scale', gridScale);
+            if (walkmanGlow) {
+                walkmanGlow.style.setProperty('--glow-intensity', glowIntensity);
+            }
+            
+            // Speed up grid animation on bass hits
+            if (bassIntensity > 0.6) {
+                walkmanEl.style.setProperty('--grid-speed', '4s');
+            } else {
+                walkmanEl.style.setProperty('--grid-speed', '8s');
+            }
             
             if (maxValue > 180 && (now - lastPulseTime) > pulseThreshold) {
                 walkmanEl.classList.add('audio-react');
@@ -1090,12 +1128,6 @@
                     inset -2px 0 15px rgba(255, 110, 199, ${0.1 + intensity * 0.2})
                 `;
                 
-                // Make internal grid react
-                const gridIntensity = 0.25 + (intensity * 0.3);
-                const gridScale = 1.5 + (intensity * 0.2);
-                walkmanEl.style.setProperty('--grid-opacity', gridIntensity);
-                walkmanEl.style.setProperty('--grid-scale', gridScale);
-                
                 setTimeout(() => {
                     walkmanEl.classList.remove('audio-react');
                 }, 100);
@@ -1113,10 +1145,6 @@
                     inset -2px 0 15px rgba(255, 110, 199, 0.1)
                 `;
             }
-            
-            // Continuously update grid based on average audio
-            const gridOpacity = 0.25 + (avgValue / 255) * 0.2;
-            walkmanEl.style.setProperty('--grid-opacity', gridOpacity);
             
             // Clear with fade trail effect
             ctx.fillStyle = 'rgba(5, 5, 10, 0.15)';
