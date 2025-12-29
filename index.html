@@ -67,7 +67,7 @@
 
         .container {
             width: 100%;
-            max-width: 450px;
+            max-width: 420px;
             max-height: 90vh;
             perspective: 1500px;
             position: relative;
@@ -78,7 +78,7 @@
             background: 
                 linear-gradient(145deg, rgba(10, 10, 10, 0.95), rgba(20, 20, 30, 0.9));
             border-radius: 28px;
-            padding: 30px 28px;
+            padding: 25px 25px 20px 25px;
             box-shadow: 
                 0 30px 80px rgba(0, 0, 0, 0.8),
                 0 15px 40px rgba(255, 215, 0, 0.2),
@@ -90,7 +90,6 @@
             border: 3px solid rgba(255, 215, 0, 0.3);
             transform: translateZ(0);
             transition: all 0.3s ease;
-            aspect-ratio: 1 / 1.15;
             backdrop-filter: blur(20px);
         }
 
@@ -119,6 +118,20 @@
                 0 20px 50px rgba(255, 215, 0, 0.3),
                 inset 0 -8px 25px rgba(0, 0, 0, 0.6),
                 inset 0 8px 25px rgba(255, 215, 0, 0.15);
+        }
+
+        /* Remove top clips */
+        .top-clips {
+            display: none;
+        }
+
+        .clip {
+            display: none;
+        }
+
+        /* Remove side buttons */
+        .side-btn {
+            display: none;
         }
 
         /* Top clips/buttons */
@@ -169,7 +182,7 @@
             font-weight: 900;
             letter-spacing: 2px;
             color: #ffd700;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             font-family: 'Orbitron', sans-serif;
             text-shadow: 
                 0 0 20px rgba(255, 215, 0, 0.8),
@@ -180,8 +193,8 @@
         /* Status LEDs */
         .status-leds {
             position: absolute;
-            top: 60px;
-            left: 35px;
+            top: 30px;
+            left: 30px;
             display: flex;
             flex-direction: column;
             gap: 10px;
@@ -779,12 +792,6 @@
 <body>
     <div class="container">
         <div class="walkman">
-            <!-- Top clips -->
-            <div class="top-clips">
-                <div class="clip"></div>
-                <div class="clip"></div>
-            </div>
-
             <!-- Logo -->
             <div class="logo">TEZOS</div>
 
@@ -799,10 +806,6 @@
                     <div class="led-label">FM STEREO</div>
                 </div>
             </div>
-
-            <!-- Side buttons -->
-            <div class="side-btn off">OFF</div>
-            <div class="side-btn mode"></div>
 
             <!-- Control pod with visualizer -->
             <div class="control-pod">
@@ -824,12 +827,6 @@
                 <div class="progress-container">
                     <div class="progress-bar" id="progressBar"></div>
                 </div>
-            </div>
-
-            <!-- Bottom branding -->
-            <div class="bottom-brand">
-                <div class="sports-text">SPORTS</div>
-                <div class="walkman-fm">TEZOS AUDIO</div>
             </div>
 
             <!-- Input section -->
