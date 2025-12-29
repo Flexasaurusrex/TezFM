@@ -91,6 +91,7 @@
             transform: translateZ(0);
             transition: all 0.3s ease;
             backdrop-filter: blur(20px);
+            overflow: hidden;
         }
 
         .walkman::before {
@@ -109,6 +110,47 @@
                 );
             border-radius: 28px;
             pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Audio reactive glow layer */
+        .walkman::after {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            background: transparent;
+            border-radius: 32px;
+            pointer-events: none;
+            z-index: -1;
+            transition: box-shadow 0.1s ease;
+        }
+
+        .walkman.audio-react::after {
+            animation: audio-pulse 0.1s ease;
+        }
+
+        @keyframes audio-pulse {
+            0% { 
+                box-shadow: 
+                    0 0 30px rgba(255, 215, 0, 0.4),
+                    0 0 60px rgba(255, 215, 0, 0.2),
+                    inset 0 0 30px rgba(255, 215, 0, 0.1);
+            }
+            50% { 
+                box-shadow: 
+                    0 0 60px rgba(255, 215, 0, 0.8),
+                    0 0 120px rgba(255, 110, 199, 0.4),
+                    inset 0 0 60px rgba(255, 215, 0, 0.2);
+            }
+            100% { 
+                box-shadow: 
+                    0 0 30px rgba(255, 215, 0, 0.4),
+                    0 0 60px rgba(255, 215, 0, 0.2),
+                    inset 0 0 30px rgba(255, 215, 0, 0.1);
+            }
         }
 
         .walkman:hover {
@@ -118,6 +160,12 @@
                 0 20px 50px rgba(255, 215, 0, 0.3),
                 inset 0 -8px 25px rgba(0, 0, 0, 0.6),
                 inset 0 8px 25px rgba(255, 215, 0, 0.15);
+        }
+
+        /* Make sure all content is above the background layers */
+        .walkman > * {
+            position: relative;
+            z-index: 1;
         }
 
         /* Remove top clips */
@@ -939,6 +987,9 @@
         }
 
         // Retrowave visualizer animation - BADASS VERSION
+        let lastPulseTime = 0;
+        const pulseThreshold = 100; // Minimum ms between pulses
+        
         function drawVisualizer() {
             animationId = requestAnimationFrame(drawVisualizer);
             
@@ -951,12 +1002,54 @@
             const centerX = width / 2;
             const centerY = height / 2;
             
+            // Calculate audio intensity for body pulse
+            const avgValue = dataArray.reduce((a, b) => a + b, 0) / bufferLength;
+            const maxValue = Math.max(...dataArray);
+            
+            // Make the entire player body pulse with audio
+            const walkmanEl = document.querySelector('.walkman');
+            const now = Date.now();
+            
+            if (maxValue > 180 && (now - lastPulseTime) > pulseThreshold) {
+                walkmanEl.classList.add('audio-react');
+                
+                // Dynamic border glow based on audio intensity
+                const intensity = maxValue / 255;
+                walkmanEl.style.borderColor = `rgba(255, 215, 0, ${0.3 + intensity * 0.7})`;
+                walkmanEl.style.boxShadow = `
+                    0 30px 80px rgba(0, 0, 0, 0.8),
+                    0 15px 40px rgba(255, 215, 0, ${0.2 + intensity * 0.6}),
+                    0 0 ${40 + intensity * 60}px rgba(255, 215, 0, ${intensity * 0.8}),
+                    0 0 ${80 + intensity * 120}px rgba(255, 110, 199, ${intensity * 0.4}),
+                    inset 0 -8px 25px rgba(0, 0, 0, 0.6),
+                    inset 0 8px 25px rgba(255, 215, 0, ${0.1 + intensity * 0.3}),
+                    inset 2px 0 15px rgba(255, 215, 0, ${0.15 + intensity * 0.2}),
+                    inset -2px 0 15px rgba(255, 110, 199, ${0.1 + intensity * 0.2})
+                `;
+                
+                setTimeout(() => {
+                    walkmanEl.classList.remove('audio-react');
+                }, 100);
+                
+                lastPulseTime = now;
+            } else if (maxValue < 100) {
+                // Reset to normal when quiet
+                walkmanEl.style.borderColor = 'rgba(255, 215, 0, 0.3)';
+                walkmanEl.style.boxShadow = `
+                    0 30px 80px rgba(0, 0, 0, 0.8),
+                    0 15px 40px rgba(255, 215, 0, 0.2),
+                    inset 0 -8px 25px rgba(0, 0, 0, 0.6),
+                    inset 0 8px 25px rgba(255, 215, 0, 0.1),
+                    inset 2px 0 15px rgba(255, 215, 0, 0.15),
+                    inset -2px 0 15px rgba(255, 110, 199, 0.1)
+                `;
+            }
+            
             // Clear with fade trail effect
             ctx.fillStyle = 'rgba(5, 5, 10, 0.15)';
             ctx.fillRect(0, 0, width, height);
             
             // Draw outer ring glow
-            const maxValue = Math.max(...dataArray);
             const glowIntensity = maxValue / 255;
             
             ctx.beginPath();
@@ -1039,7 +1132,6 @@
             }
             
             // Draw pulsing center rings
-            const avgValue = dataArray.reduce((a, b) => a + b, 0) / bufferLength;
             const pulseRadius = radius * 0.25 + (avgValue / 255) * 15;
             
             for (let i = 0; i < 3; i++) {
