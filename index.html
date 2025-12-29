@@ -974,13 +974,16 @@
         </div>
     </div>
 
-    <audio id="audioPlayer" preload="auto" crossorigin="anonymous"></audio>
+    <audio id="audioPlayer" preload="auto" crossorigin="anonymous" style="display: none;"></audio>
+    <video id="videoPlayer" preload="auto" crossorigin="anonymous" style="display: none;"></video>
 
     <script>
         let playlist = [];
         let currentTrackIndex = -1;
         let isPlaying = false;
         const audioPlayer = document.getElementById('audioPlayer');
+        const videoPlayer = document.getElementById('videoPlayer');
+        let activePlayer = audioPlayer; // Track which player is active
         const playBtn = document.getElementById('playBtn');
         const progressBar = document.getElementById('progressBar');
 
@@ -1050,14 +1053,15 @@
                     bufferLength = analyser.frequencyBinCount;
                     dataArray = new Uint8Array(bufferLength);
                     
-                    // Only create source once
-                    const source = audioContext.createMediaElementSource(audioPlayer);
+                    // Only create source once - will connect to whichever player is active
+                    const source = audioContext.createMediaElementSource(activePlayer);
                     source.connect(analyser);
                     analyser.connect(audioContext.destination);
                     
                     console.log('Audio context initialized successfully');
                 } catch (error) {
                     console.error('Error initializing audio context:', error);
+                    // If error (likely already created), try to get existing source
                 }
             }
         }
@@ -1095,13 +1099,13 @@
             // Grid gets MUCH brighter and scales dramatically with bass
             const gridOpacity = 0.4 + (bassIntensity * 0.6); // 0.4 to 1.0
             const gridScale = 2 + (bassIntensity * 0.8); // 2.0 to 2.8
-            const glowIntensity = 0.12 + (avgValue / 255) * 0.3; // 0.12 to 0.42
+            const backgroundGlowIntensity = 0.12 + (avgValue / 255) * 0.3; // 0.12 to 0.42
             
             // Update CSS variables for smooth transitions
             walkmanEl.style.setProperty('--grid-opacity', gridOpacity);
             walkmanEl.style.setProperty('--grid-scale', gridScale);
             if (walkmanGlow) {
-                walkmanGlow.style.setProperty('--glow-intensity', glowIntensity);
+                walkmanGlow.style.setProperty('--glow-intensity', backgroundGlowIntensity);
             }
             
             // Speed up grid animation on bass hits
@@ -1403,9 +1407,12 @@
                 
                 console.log('Token data:', token);
                 
-                // Check if it's an audio file using the mime field
-                if (!token.mime || !token.mime.includes('audio')) {
-                    throw new Error(`This NFT is not an audio file (mime type: ${token.mime || 'unknown'}). Only audio NFTs are supported.`);
+                // Check if it's an audio OR video file using the mime field
+                const isAudio = token.mime && token.mime.includes('audio');
+                const isVideo = token.mime && (token.mime.includes('video') || token.mime.includes('mp4') || token.mime.includes('webm'));
+                
+                if (!isAudio && !isVideo) {
+                    throw new Error(`This NFT is not an audio or video file (mime type: ${token.mime || 'unknown'}). Only audio/video NFTs are supported.`);
                 }
 
                 // Handle IPFS URLs
@@ -1430,7 +1437,8 @@
                     artist: artistName,
                     url: audioUrl,
                     tokenId: token.token_id,
-                    contract: token.fa_contract
+                    contract: token.fa_contract,
+                    mime: token.mime
                 };
             } catch (error) {
                 console.error('Fetch error:', error);
@@ -1533,7 +1541,22 @@
             if (index < 0 || index >= playlist.length) return;
             
             const track = playlist[index];
-            audioPlayer.src = track.url;
+            
+            // Determine if this is a video or audio file
+            const isVideo = track.mime && (track.mime.includes('video') || track.mime.includes('mp4') || track.mime.includes('webm'));
+            
+            // Pause both players first
+            audioPlayer.pause();
+            videoPlayer.pause();
+            
+            // Set the active player based on file type
+            if (isVideo) {
+                activePlayer = videoPlayer;
+                videoPlayer.src = track.url;
+            } else {
+                activePlayer = audioPlayer;
+                audioPlayer.src = track.url;
+            }
             
             document.getElementById('trackTitle').textContent = track.title;
             document.getElementById('trackArtist').textContent = track.artist;
@@ -1561,7 +1584,7 @@
                 audioContext.resume();
             }
             
-            audioPlayer.play();
+            activePlayer.play();
             isPlaying = true;
             playBtn.innerHTML = '⏸';
             document.getElementById('led1').classList.remove('off');
@@ -1569,7 +1592,7 @@
         }
 
         function pause() {
-            audioPlayer.pause();
+            activePlayer.pause();
             isPlaying = false;
             playBtn.innerHTML = '▶';
             document.getElementById('led1').classList.add('off');
@@ -1606,20 +1629,25 @@
             }
         }
 
-        // Audio event listeners
-        audioPlayer.addEventListener('timeupdate', () => {
-            const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
-            progressBar.style.width = progress + '%';
-        });
+        // Audio/Video event listeners
+        function setupPlayerListeners(player) {
+            player.addEventListener('timeupdate', () => {
+                const progress = (player.currentTime / player.duration) * 100;
+                progressBar.style.width = progress + '%';
+            });
 
-        audioPlayer.addEventListener('ended', () => {
-            nextTrack();
-        });
+            player.addEventListener('ended', () => {
+                nextTrack();
+            });
 
-        audioPlayer.addEventListener('error', (e) => {
-            console.error('Audio playback error:', e);
-            alert('Error playing audio. The file might be unavailable or in an unsupported format.');
-        });
+            player.addEventListener('error', (e) => {
+                console.error('Playback error:', e);
+                alert('Error playing media. The file might be unavailable or in an unsupported format.');
+            });
+        }
+
+        setupPlayerListeners(audioPlayer);
+        setupPlayerListeners(videoPlayer);
 
         // Allow Enter key to add tracks
         document.getElementById('nftInput').addEventListener('keypress', (e) => {
