@@ -1304,18 +1304,20 @@
                     regex: /objkt\.com\/asset\/([^\/]+)\/(\d+)/,
                     handler: (match) => ({ contract: match[1], tokenId: match[2] })
                 },
-                // Hic et nunc format: objkt.com/tokens/hicetnunc/TOKEN
-                {
-                    regex: /objkt\.com\/tokens\/hicetnunc\/(\d+)/,
-                    handler: (match) => ({ 
-                        contract: 'KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton', // hic et nunc v2 contract
-                        tokenId: match[1] 
-                    })
-                },
-                // Generic tokens format: objkt.com/tokens/CONTRACT/TOKEN
+                // Tokens format: objkt.com/tokens/CONTRACT/TOKEN
                 {
                     regex: /objkt\.com\/tokens\/([^\/]+)\/(\d+)/,
-                    handler: (match) => ({ contract: match[1], tokenId: match[2] })
+                    handler: (match) => {
+                        // Check if it's "hicetnunc" keyword or actual contract
+                        if (match[1] === 'hicetnunc') {
+                            return { 
+                                contract: 'KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton', 
+                                tokenId: match[2] 
+                            };
+                        } else {
+                            return { contract: match[1], tokenId: match[2] };
+                        }
+                    }
                 },
                 // Just a number at the end
                 {
