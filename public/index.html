@@ -1863,19 +1863,19 @@
                 const dataIndex = Math.floor((i / bars) * (bufferLength * 0.6));
                 let value = dataArray[dataIndex] || 0;
                 
-                // BALANCED frequency tuning - sweet spot
+                // EVEN frequency distribution - solid cohesive waveform
                 if (i < bars / 8) {
-                    // Bass - reduce significantly (35%)
-                    value = value * 0.35;
-                } else if (i < bars / 4) {
-                    // Low bass - moderate crush (50%)
+                    // Bass - moderate reduction (50%)
                     value = value * 0.5;
+                } else if (i < bars / 4) {
+                    // Low bass - gentle crush (65%)
+                    value = value * 0.65;
                 } else if (i < bars / 2) {
-                    // Low-mids - moderate boost
-                    value = Math.min(255, value * 1.6);
+                    // Low-mids - gentle boost
+                    value = Math.min(255, value * 1.3);
                 } else {
-                    // Mids/highs - strong boost (vocals, instruments)
-                    value = Math.min(255, value * 2.4);
+                    // Mids/highs - moderate boost
+                    value = Math.min(255, value * 1.7);
                 }
                 
                 // Add dynamic range compression to prevent saturation
