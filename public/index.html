@@ -2593,7 +2593,7 @@
                 // Query Objkt.com API for random audio NFTs
                 // Using a random offset to get different results each time
                 const randomOffset = Math.floor(Math.random() * 500);
-                const limit = 30; // Try to get 30, will filter down
+                const limit = 50; // Fetch more since we'll filter out sound effects
                 
                 const response = await fetch(`https://data.objkt.com/v3/graphql`, {
                     method: 'POST',
@@ -2656,8 +2656,21 @@
                     
                     try {
                         const trackData = await fetchNFTData(url);
+                        
+                        // Filter out sound effects by checking duration
+                        // Skip tracks shorter than 90 seconds (likely sound effects)
+                        if (trackData.duration && trackData.duration < 90) {
+                            console.log(`Skipping short track: ${trackData.name} (${trackData.duration}s)`);
+                            continue;
+                        }
+                        
                         playlist.push(trackData);
                         successCount++;
+                        
+                        // Stop if we have enough tracks
+                        if (successCount >= 20) {
+                            break;
+                        }
                     } catch (error) {
                         console.error(`Failed to load ${url}:`, error);
                     }
