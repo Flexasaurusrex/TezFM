@@ -2623,9 +2623,12 @@
                 }
                 
                 const data = await response.json();
-                const tokens = data.data.token;
+                console.log('API response:', data); // Debug logging
+                
+                const tokens = data.data?.token || data.data?.tokens || [];
                 
                 if (!tokens || tokens.length === 0) {
+                    console.error('No tokens found in response:', data);
                     alert('No audio NFTs found. Try again!');
                     return;
                 }
