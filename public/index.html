@@ -1018,6 +1018,42 @@
             transform: translateY(-2px);
         }
 
+        /* Random Discovery Button */
+        .random-discovery-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(145deg, rgba(255, 110, 199, 0.3), rgba(255, 110, 199, 0.2));
+            border: 2px solid rgba(255, 110, 199, 0.5);
+            border-radius: 10px;
+            color: #ff6ec7;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .random-discovery-btn:hover {
+            background: linear-gradient(145deg, rgba(255, 110, 199, 0.4), rgba(255, 110, 199, 0.3));
+            border-color: rgba(255, 110, 199, 0.6);
+            box-shadow: 0 6px 18px rgba(255, 110, 199, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .random-discovery-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+
         /* Info Button & Modal */
         .info-btn {
             position: absolute;
@@ -1497,6 +1533,11 @@
             </div>
 
             <div class="loading" id="loading">LOADING TRACK DATA...</div>
+
+            <!-- Random Discovery Button -->
+            <button class="random-discovery-btn" onclick="discoverRandomMusic()" id="randomDiscoveryBtn">
+                🎲 Discover Random Music
+            </button>
 
             <!-- Featured Playlists Section -->
             <div class="featured-section">
@@ -2541,6 +2582,111 @@
                 document.body.removeChild(textarea);
                 alert(`✅ "${playlist.name}" copied to clipboard!\n\nNow paste into Bulk Add to load all tracks.`);
             });
+        }
+
+        async function discoverRandomMusic() {
+            const btn = document.getElementById('randomDiscoveryBtn');
+            btn.disabled = true;
+            btn.textContent = '🎲 Discovering...';
+            
+            try {
+                // Query Objkt.com API for random audio NFTs
+                // Using a random offset to get different results each time
+                const randomOffset = Math.floor(Math.random() * 1000);
+                const limit = 30; // Try to get 30, will filter down
+                
+                const response = await fetch(`https://data.objkt.com/v3/graphql`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        query: `{
+                            token(
+                                where: {
+                                    mime_type: {_eq: "audio/mpeg"},
+                                    artifact_uri: {_is_null: false}
+                                },
+                                limit: ${limit},
+                                offset: ${randomOffset},
+                                order_by: {pk: desc}
+                            ) {
+                                token_id
+                                fa_contract
+                                name
+                                mime_type
+                            }
+                        }`
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch from Objkt API');
+                }
+                
+                const data = await response.json();
+                const tokens = data.data.token;
+                
+                if (!tokens || tokens.length === 0) {
+                    alert('No audio NFTs found. Try again!');
+                    return;
+                }
+                
+                // Clear current playlist
+                playlist = [];
+                currentTrackIndex = -1;
+                updatePlaylist();
+                savePlaylistToStorage();
+                
+                // Load random tracks
+                const loading = document.getElementById('loading');
+                loading.classList.add('active');
+                
+                let successCount = 0;
+                const maxTracks = 20; // Load max 20 random tracks
+                
+                // Shuffle and take subset
+                const shuffled = tokens.sort(() => Math.random() - 0.5).slice(0, maxTracks);
+                
+                for (let i = 0; i < shuffled.length; i++) {
+                    const token = shuffled[i];
+                    const url = `https://objkt.com/tokens/${token.fa_contract}/${token.token_id}`;
+                    
+                    loading.textContent = `LOADING ${i + 1}/${shuffled.length}...`;
+                    
+                    try {
+                        const trackData = await fetchTokenData(url);
+                        playlist.push(trackData);
+                        successCount++;
+                    } catch (error) {
+                        console.error(`Failed to load ${url}:`, error);
+                    }
+                    
+                    // Small delay to avoid rate limiting
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                }
+                
+                loading.classList.remove('active');
+                loading.textContent = 'LOADING TRACK DATA...';
+                
+                updatePlaylist();
+                
+                if (playlist.length > 0) {
+                    currentTrackIndex = 0;
+                    loadTrack(0);
+                    alert(`🎲 Loaded ${successCount} random tracks!`);
+                } else {
+                    alert('No tracks could be loaded. Try again!');
+                }
+                
+                updateStatus();
+                savePlaylistToStorage();
+                
+            } catch (error) {
+                console.error('Discovery error:', error);
+                alert('Failed to discover music. Please try again!');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🎲 Discover Random Music';
+            }
         }
 
         function clearAllTracks() {
