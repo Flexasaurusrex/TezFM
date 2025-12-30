@@ -857,6 +857,167 @@
             transform: translateY(-1px);
         }
 
+        /* Featured Playlists */
+        .featured-section {
+            margin-bottom: 18px;
+        }
+
+        .featured-toggle-btn {
+            width: 100%;
+            background: linear-gradient(145deg, rgba(255, 215, 0, 0.2), rgba(255, 215, 0, 0.1));
+            border: 3px solid rgba(255, 215, 0, 0.4);
+            border-radius: 12px;
+            padding: 12px 20px;
+            color: #ffd700;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 13px;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
+        }
+
+        .featured-toggle-btn:hover {
+            background: linear-gradient(145deg, rgba(255, 215, 0, 0.3), rgba(255, 215, 0, 0.2));
+            border-color: rgba(255, 215, 0, 0.6);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .featured-playlists {
+            margin-top: 12px;
+            background: rgba(15, 15, 31, 0.6);
+            border-radius: 12px;
+            border: 2px solid rgba(255, 215, 0, 0.2);
+            padding: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .featured-playlist-item {
+            background: rgba(26, 26, 46, 0.6);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-left: 4px solid #ffd700;
+            transition: all 0.3s ease;
+        }
+
+        .featured-playlist-item:hover {
+            background: rgba(255, 215, 0, 0.1);
+            border-left-color: #00ffcc;
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.2);
+        }
+
+        .featured-playlist-name {
+            color: #ffd700;
+            font-size: 13px;
+            font-weight: 900;
+            margin-bottom: 4px;
+            font-family: 'Orbitron', sans-serif;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+        }
+
+        .featured-playlist-curator {
+            color: #ff6ec7;
+            font-size: 10px;
+            margin-bottom: 6px;
+            font-family: 'Orbitron', sans-serif;
+            opacity: 0.8;
+        }
+
+        .featured-playlist-count {
+            color: #00ffcc;
+            font-size: 10px;
+            margin-bottom: 8px;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .copy-playlist-btn {
+            background: linear-gradient(145deg, #00ffcc, #00d4aa);
+            border: 2px solid #0a0a0a;
+            border-radius: 8px;
+            padding: 8px 16px;
+            color: #0a0a0a;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 10px;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .copy-playlist-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 255, 204, 0.4);
+        }
+
+        /* Playlist Header */
+        .playlist-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .playlist-title {
+            color: #00ffcc;
+            font-size: 12px;
+            font-weight: 900;
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px rgba(0, 255, 204, 0.6);
+        }
+
+        .clear-all-btn {
+            background: rgba(255, 0, 80, 0.2);
+            border: 2px solid rgba(255, 0, 80, 0.4);
+            border-radius: 8px;
+            padding: 6px 12px;
+            color: #ff0050;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .clear-all-btn:hover {
+            background: rgba(255, 0, 80, 0.3);
+            border-color: rgba(255, 0, 80, 0.6);
+            box-shadow: 0 0 15px rgba(255, 0, 80, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .submit-playlist-btn {
+            background: linear-gradient(145deg, rgba(120, 115, 245, 0.3), rgba(120, 115, 245, 0.2));
+            border: 3px solid rgba(120, 115, 245, 0.4);
+            border-radius: 10px;
+            padding: 10px 20px;
+            color: #7873f5;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 12px rgba(120, 115, 245, 0.2);
+        }
+
+        .submit-playlist-btn:hover {
+            background: linear-gradient(145deg, rgba(120, 115, 245, 0.4), rgba(120, 115, 245, 0.3));
+            border-color: rgba(120, 115, 245, 0.6);
+            box-shadow: 0 6px 18px rgba(120, 115, 245, 0.4);
+            transform: translateY(-2px);
+        }
+
         /* Playlist */
         .playlist {
             background: rgba(15, 15, 31, 0.6);
@@ -1091,10 +1252,29 @@
 
             <div class="loading" id="loading">LOADING TRACK DATA...</div>
 
+            <!-- Featured Playlists Section -->
+            <div class="featured-section">
+                <button class="featured-toggle-btn" onclick="toggleFeatured()" id="featuredToggleBtn">
+                    ⭐ Featured Playlists
+                </button>
+                <div class="featured-playlists" id="featuredPlaylists" style="display: none;">
+                    <!-- Playlists will be loaded here -->
+                </div>
+            </div>
+
             <!-- Playlist -->
+            <div class="playlist-header">
+                <span class="playlist-title">My Playlist</span>
+                <button class="clear-all-btn" onclick="clearAllTracks()" title="Clear all tracks">🗑️ Clear All</button>
+            </div>
             <div class="playlist" id="playlist"></div>
 
             <div class="status" id="status">Playlist empty</div>
+            
+            <!-- Submit Playlist Button -->
+            <div style="text-align: center; margin-top: 15px;">
+                <button class="submit-playlist-btn" onclick="openSubmitForm()">📝 Submit Your Playlist</button>
+            </div>
         </div>
     </div>
 
@@ -1950,6 +2130,115 @@
                 addTrack();
             }
         });
+
+        // Featured Playlists Data
+        const featuredPlaylists = [
+            {
+                name: "Tezos Beats Starter Pack",
+                curator: "TEZ FM",
+                tracks: [
+                    "https://objkt.com/tokens/KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton/129",
+                    "https://objkt.com/tokens/KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton/500",
+                    "https://objkt.com/tokens/KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton/750"
+                ]
+            },
+            {
+                name: "Retrowave Essentials",
+                curator: "TEZ FM",
+                tracks: [
+                    "https://objkt.com/tokens/KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton/200",
+                    "https://objkt.com/tokens/KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton/350"
+                ]
+            }
+        ];
+
+        function toggleFeatured() {
+            const featuredDiv = document.getElementById('featuredPlaylists');
+            const toggleBtn = document.getElementById('featuredToggleBtn');
+            
+            if (featuredDiv.style.display === 'none') {
+                featuredDiv.style.display = 'block';
+                toggleBtn.textContent = '➖ Featured Playlists';
+                loadFeaturedPlaylists();
+            } else {
+                featuredDiv.style.display = 'none';
+                toggleBtn.textContent = '⭐ Featured Playlists';
+            }
+        }
+
+        function loadFeaturedPlaylists() {
+            const container = document.getElementById('featuredPlaylists');
+            container.innerHTML = '';
+            
+            featuredPlaylists.forEach((playlist, index) => {
+                const item = document.createElement('div');
+                item.className = 'featured-playlist-item';
+                
+                item.innerHTML = `
+                    <div class="featured-playlist-name">${playlist.name}</div>
+                    <div class="featured-playlist-curator">Curated by ${playlist.curator}</div>
+                    <div class="featured-playlist-count">${playlist.tracks.length} tracks</div>
+                    <button class="copy-playlist-btn" onclick="copyPlaylistToClipboard(${index})">📋 Copy Playlist</button>
+                `;
+                
+                container.appendChild(item);
+            });
+        }
+
+        function copyPlaylistToClipboard(playlistIndex) {
+            const playlist = featuredPlaylists[playlistIndex];
+            const playlistText = playlist.tracks.join('\n');
+            
+            navigator.clipboard.writeText(playlistText).then(() => {
+                alert(`✅ "${playlist.name}" copied to clipboard!\n\nNow paste into Bulk Add to load all tracks.`);
+            }).catch(err => {
+                // Fallback for older browsers
+                const textarea = document.createElement('textarea');
+                textarea.value = playlistText;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                alert(`✅ "${playlist.name}" copied to clipboard!\n\nNow paste into Bulk Add to load all tracks.`);
+            });
+        }
+
+        function clearAllTracks() {
+            if (playlist.length === 0) {
+                alert('Playlist is already empty!');
+                return;
+            }
+            
+            if (confirm(`Clear all ${playlist.length} track${playlist.length > 1 ? 's' : ''} from your playlist?`)) {
+                playlist = [];
+                currentTrackIndex = -1;
+                isPlaying = false;
+                
+                audioPlayer.pause();
+                audioPlayer.src = '';
+                
+                document.getElementById('trackTitle').textContent = 'Ready to play';
+                document.getElementById('trackArtist').textContent = 'Add Objkt NFT link to begin';
+                document.getElementById('playBtn').innerHTML = '▶';
+                document.getElementById('led1').classList.add('off');
+                document.getElementById('progressBar').style.width = '0%';
+                
+                updatePlaylist();
+                updateStatus();
+                savePlaylistToStorage();
+                
+                alert('✅ Playlist cleared!');
+            }
+        }
+
+        function openSubmitForm() {
+            // Your Airtable form URL
+            const formUrl = 'https://airtable.com/appMgBEe1gf7U8uji/pagN8xlyOY8dVKlfg/form';
+            
+            if (confirm('📝 Submit Your Playlist!\n\nWant your curated playlist featured on TEZ FM?\n\nThis will open a form to submit your playlist.\n\nClick OK to continue.')) {
+                window.open(formUrl, '_blank');
+            }
+        }
 
         // Load saved playlist on page load
         loadPlaylistFromStorage();
