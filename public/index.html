@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Tezos Walkman - NFT Audio Player</title>
     
     <!-- PWA Meta Tags -->
@@ -38,12 +38,14 @@
             font-family: 'Orbitron', 'Arial Black', sans-serif;
             background: #000000;
             min-height: 100vh;
+            min-height: -webkit-fill-available;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 40px 20px;
+            padding: 20px 15px;
             position: relative;
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto;
         }
 
         /* Animated vaporwave grid background */
@@ -114,17 +116,30 @@
         .container {
             width: 100%;
             max-width: 420px;
-            max-height: 90vh;
+            max-height: none;
             perspective: 1500px;
             position: relative;
             z-index: 10;
+        }
+        
+        @media (max-height: 800px) {
+            .container {
+                max-width: 380px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                max-width: 100%;
+                padding: 0 5px;
+            }
         }
 
         .walkman {
             background: 
                 linear-gradient(145deg, rgba(10, 10, 10, 0.95), rgba(20, 20, 30, 0.9));
             border-radius: 28px;
-            padding: 25px 25px 20px 25px;
+            padding: 20px 20px 18px 20px;
             box-shadow: 
                 0 30px 80px rgba(0, 0, 0, 0.8),
                 0 15px 40px rgba(255, 215, 0, 0.2),
@@ -138,6 +153,14 @@
             transition: all 0.3s ease;
             backdrop-filter: blur(20px);
             overflow: hidden;
+        }
+        
+        @media (max-width: 480px) {
+            .walkman {
+                padding: 15px 15px 15px 15px;
+                border-radius: 20px;
+                border-width: 2px;
+            }
         }
 
         /* Animated vaporwave grid INSIDE the player */
@@ -290,6 +313,13 @@
                 0 0 40px rgba(255, 215, 0, 0.4),
                 2px 2px 4px rgba(0, 0, 0, 0.8);
         }
+        
+        @media (max-width: 480px) {
+            .logo {
+                font-size: 16px;
+                margin-bottom: 15px;
+            }
+        }
 
         /* Status LEDs */
         .status-leds {
@@ -299,6 +329,14 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
+        }
+        
+        @media (max-width: 480px) {
+            .status-leds {
+                top: 20px;
+                left: 20px;
+                gap: 8px;
+            }
         }
 
         .led-row {
@@ -378,6 +416,22 @@
                 inset 0 0 60px rgba(120, 115, 245, 0.1);
             border: 6px solid #0a0a0a;
             overflow: hidden;
+        }
+        
+        @media (max-width: 480px) {
+            .control-pod {
+                width: 180px;
+                height: 180px;
+                margin-bottom: 15px;
+                border-width: 4px;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            .control-pod {
+                width: 160px;
+                height: 160px;
+            }
         }
 
         .control-pod::before {
@@ -639,6 +693,14 @@
                 0 2px 8px rgba(0, 0, 0, 0.2);
             transition: all 0.3s ease;
         }
+        
+        @media (max-width: 480px) {
+            input {
+                padding: 10px 12px;
+                font-size: 11px;
+                border-width: 2px;
+            }
+        }
 
         input:focus {
             border-color: #00ffcc;
@@ -698,6 +760,15 @@
             box-shadow: 
                 inset 0 3px 10px rgba(0, 0, 0, 0.7),
                 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        @media (max-width: 480px) {
+            .playlist {
+                max-height: 120px;
+                padding: 10px;
+                border-radius: 12px;
+                border-width: 2px;
+            }
         }
 
         .playlist::-webkit-scrollbar {
@@ -915,7 +986,7 @@
         // Register Service Worker for PWA
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
+                navigator.serviceWorker.register('/sw.js')
                     .then((registration) => {
                         console.log('ServiceWorker registered:', registration.scope);
                     })
