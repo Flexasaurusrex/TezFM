@@ -1727,13 +1727,16 @@
 
         // Set canvas size
         function resizeCanvas() {
-            const container = document.querySelector('.spectrum-container');
-            if (container) {
-                canvas.width = container.offsetWidth;
-                canvas.height = 100; // Match CSS height
+            const visualizer = document.getElementById('visualizer');
+            if (visualizer) {
+                // Get the actual drawable area (excludes border)
+                const rect = visualizer.getBoundingClientRect();
+                canvas.width = rect.width;
+                canvas.height = rect.height;
             }
         }
-        resizeCanvas();
+        // Small delay to ensure CSS is loaded
+        setTimeout(resizeCanvas, 100);
         window.addEventListener('resize', resizeCanvas);
 
         // Initialize audio context and analyser
