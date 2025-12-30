@@ -1,13 +1,14 @@
 {
-  "name": "TEZ FM",
+  "name": "TEZ FM - Tezos NFT Radio",
   "short_name": "TEZ FM",
-  "description": "Tezos NFT Radio - Stream music NFTs with lock screen controls",
+  "description": "Your personal Tezos NFT audio player. Stream music NFTs from Objkt.com with lock screen controls and background playback.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#ffd700",
   "orientation": "portrait-primary",
+  "categories": ["music", "entertainment"],
   "icons": [
     {
       "src": "/icon-72.png",
