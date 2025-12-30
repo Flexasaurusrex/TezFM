@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Tezos Walkman - NFT Audio Player</title>
+    <title>TEZ FM - Tezos NFT Radio</title>
     
     <!-- PWA Meta Tags -->
-    <meta name="description" content="Play your Tezos audio NFTs with retrowave style. Stream from Objkt.com with lock screen controls and background playback.">
+    <meta name="description" content="TEZ FM - Your personal Tezos NFT radio station. Stream music NFTs from Objkt.com with lock screen controls and background playback.">
     <meta name="theme-color" content="#ffd700">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Tezos Walkman">
+    <meta name="apple-mobile-web-app-title" content="TEZ FM">
     
     <!-- Favicons -->
     <link rel="icon" type="image/x-icon" href="favicon.ico">
@@ -1657,12 +1657,32 @@
                 audioContext.resume();
             }
             
-            activePlayer.play();
-            isPlaying = true;
-            playBtn.innerHTML = '⏸';
-            document.getElementById('led1').classList.remove('off');
-            startVisualizer();
-            updateMediaSession(); // Update lock screen when playing
+            // Request audio session for background playback (iOS)
+            if (activePlayer.play) {
+                const playPromise = activePlayer.play();
+                
+                if (playPromise !== undefined) {
+                    playPromise
+                        .then(() => {
+                            isPlaying = true;
+                            playBtn.innerHTML = '⏸';
+                            document.getElementById('led1').classList.remove('off');
+                            startVisualizer();
+                            updateMediaSession();
+                            
+                            // Keep screen wake lock if supported
+                            if ('wakeLock' in navigator) {
+                                navigator.wakeLock.request('screen').catch(err => {
+                                    console.log('Wake lock failed:', err);
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Playback failed:', error);
+                            isPlaying = false;
+                        });
+                }
+            }
         }
 
         function pause() {
@@ -1770,6 +1790,40 @@
             // Window lost focus but keep playing
             if (isPlaying && audioContext && audioContext.state === 'suspended') {
                 audioContext.resume();
+            }
+        });
+
+        // Critical for iOS - pagehide event fires when app is backgrounded
+        window.addEventListener('pagehide', (event) => {
+            // Don't pause! iOS will try to kill audio but we resist
+            if (isPlaying) {
+                event.preventDefault();
+                if (audioContext && audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+            }
+        });
+
+        // Resume when coming back to foreground
+        window.addEventListener('pageshow', (event) => {
+            if (isPlaying && activePlayer.paused) {
+                activePlayer.play().catch(err => console.log('Resume failed:', err));
+            }
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+        });
+
+        // iOS specifically - handle audio interruptions
+        audioPlayer.addEventListener('pause', () => {
+            // If we're supposed to be playing but got paused externally
+            if (isPlaying && !activePlayer.ended) {
+                // Try to resume after a brief delay
+                setTimeout(() => {
+                    if (isPlaying && activePlayer.paused) {
+                        activePlayer.play().catch(err => console.log('Auto-resume failed:', err));
+                    }
+                }, 100);
             }
         });
 
