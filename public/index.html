@@ -1979,10 +1979,11 @@
 
         async function bulkAddTracks() {
             const textarea = document.getElementById('bulkInput');
+            // Handle all line break types: \n, \r\n, \r
             const urls = textarea.value
-                .split('\n')
+                .split(/\r?\n|\r/)
                 .map(line => line.trim())
-                .filter(line => line.length > 0);
+                .filter(line => line.length > 0 && line.startsWith('http'));
             
             if (urls.length === 0) {
                 alert('Please paste at least one Objkt URL');
