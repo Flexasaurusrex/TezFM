@@ -2,7 +2,7 @@
   "name": "Tezos Walkman - NFT Audio Player",
   "short_name": "Tezos Walkman",
   "description": "Play your Tezos audio NFTs with retrowave style. Stream from Objkt.com with lock screen controls and background playback.",
-  "start_url": "./walkman-player.html",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#ffd700",
@@ -88,7 +88,7 @@
     }
   ],
   "share_target": {
-    "action": "./walkman-player.html",
+    "action": "/",
     "method": "GET",
     "params": {
       "url": "nft_url"
