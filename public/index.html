@@ -539,6 +539,14 @@
                 inset 0 2px 6px rgba(0, 0, 0, 0.8),
                 0 1px 2px rgba(120, 115, 245, 0.2);
             position: relative;
+            cursor: pointer;
+        }
+
+        .progress-container:hover {
+            border-color: rgba(255, 215, 0, 0.4);
+            box-shadow: 
+                inset 0 2px 6px rgba(0, 0, 0, 0.8),
+                0 0 10px rgba(255, 215, 0, 0.3);
         }
 
         .progress-bar {
@@ -1564,6 +1572,19 @@
         let activePlayer = audioPlayer;
         const playBtn = document.getElementById('playBtn');
         const progressBar = document.getElementById('progressBar');
+        const progressContainer = document.querySelector('.progress-container');
+
+        // Progress bar scrubbing
+        progressContainer.addEventListener('click', (e) => {
+            if (!activePlayer.duration) return;
+            
+            const rect = progressContainer.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const percentage = clickX / rect.width;
+            const newTime = percentage * activePlayer.duration;
+            
+            activePlayer.currentTime = newTime;
+        });
 
         // Media Session API - Enable lock screen controls and background playback
         function updateMediaSession() {
@@ -1793,7 +1814,6 @@
             // Draw chromatic spectrum bars
             const bars = 64;
             const barWidth = width / bars;
-            const barSpacing = 1;
             
             for (let i = 0; i < bars; i++) {
                 const dataIndex = Math.floor((i / bars) * bufferLength);
@@ -1826,15 +1846,15 @@
                     gradient.addColorStop(1, `rgba(0, 255, 204, ${0.6 + value/255 * 0.4})`);
                 }
                 
-                // Draw bar
+                // Draw bar - full width with no spacing
                 ctx.fillStyle = gradient;
-                ctx.fillRect(x, y, barWidth - barSpacing, barHeight);
+                ctx.fillRect(x, y, barWidth, barHeight);
                 
                 // Add glow on high values
                 if (value > 180) {
                     ctx.shadowBlur = 10 + (value / 255) * 10;
                     ctx.shadowColor = gradient;
-                    ctx.fillRect(x, y, barWidth - barSpacing, barHeight);
+                    ctx.fillRect(x, y, barWidth, barHeight);
                     ctx.shadowBlur = 0;
                 }
                 
