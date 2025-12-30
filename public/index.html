@@ -1768,6 +1768,8 @@
         let lastPulseTime = 0;
         const pulseThreshold = 100; // Minimum ms between pulses
         let smoothedValues = new Array(64).fill(0); // For smooth wave motion
+        let peakHolds = new Array(64).fill(0); // For peak hold dots
+        let peakFallRate = 0.98; // How fast peaks fall (0.98 = slow fall)
         
         function drawVisualizer() {
             animationId = requestAnimationFrame(drawVisualizer);
@@ -1863,19 +1865,19 @@
                 const dataIndex = Math.floor((i / bars) * (bufferLength * 0.6));
                 let value = dataArray[dataIndex] || 0;
                 
-                // EVEN frequency distribution - solid cohesive waveform
+                // FLAT frequency distribution - truly even waveform
                 if (i < bars / 8) {
-                    // Bass - moderate reduction (50%)
-                    value = value * 0.5;
+                    // Bass - gentle reduction (60%)
+                    value = value * 0.6;
                 } else if (i < bars / 4) {
-                    // Low bass - gentle crush (65%)
-                    value = value * 0.65;
+                    // Low bass - slight reduction (75%)
+                    value = value * 0.75;
                 } else if (i < bars / 2) {
-                    // Low-mids - gentle boost
-                    value = Math.min(255, value * 1.3);
+                    // Low-mids - minimal boost
+                    value = Math.min(255, value * 1.15);
                 } else {
-                    // Mids/highs - moderate boost
-                    value = Math.min(255, value * 1.7);
+                    // Mids/highs - gentle boost only
+                    value = Math.min(255, value * 1.35);
                 }
                 
                 // Add dynamic range compression to prevent saturation
@@ -1928,24 +1930,76 @@
                     gradient.addColorStop(1, `rgba(0, 255, 204, ${0.6 + value/255 * 0.4})`);
                 }
                 
-                // Draw bar - full width with no spacing
-                ctx.fillStyle = gradient;
-                ctx.fillRect(x, y, barWidth, barHeight);
+                // Calculate center-based positions for mirror effect
+                const centerY = height / 2;
+                const barTop = centerY - barHeight;
+                const mirrorBottom = centerY + (barHeight * 0.3); // Mirror is 30% of bar height
                 
-                // Add glow on high values
-                if (value > 180) {
-                    ctx.shadowBlur = 10 + (value / 255) * 10;
-                    ctx.shadowColor = gradient;
-                    ctx.fillRect(x, y, barWidth, barHeight);
+                // Draw main bar (upward from center)
+                ctx.fillStyle = gradient;
+                ctx.fillRect(x, barTop, barWidth, barHeight);
+                
+                // FEATURE 1: VERTICAL MIRROR (reflection downward from center)
+                const mirrorGradient = ctx.createLinearGradient(x, centerY, x, mirrorBottom);
+                if (i < bars / 8) {
+                    mirrorGradient.addColorStop(0, `rgba(255, 215, 0, ${0.4 + normalizedValue * 0.3})`);
+                    mirrorGradient.addColorStop(1, `rgba(255, 255, 100, 0)`);
+                } else if (i < bars / 4) {
+                    mirrorGradient.addColorStop(0, `rgba(255, 140, 0, ${0.4 + normalizedValue * 0.3})`);
+                    mirrorGradient.addColorStop(1, `rgba(255, 110, 199, 0)`);
+                } else if (i < bars / 2) {
+                    mirrorGradient.addColorStop(0, `rgba(255, 110, 199, ${0.4 + normalizedValue * 0.3})`);
+                    mirrorGradient.addColorStop(1, `rgba(120, 115, 245, 0)`);
+                } else {
+                    mirrorGradient.addColorStop(0, `rgba(120, 115, 245, ${0.4 + normalizedValue * 0.3})`);
+                    mirrorGradient.addColorStop(1, `rgba(0, 255, 204, 0)`);
+                }
+                ctx.fillStyle = mirrorGradient;
+                ctx.fillRect(x, centerY, barWidth, barHeight * 0.3);
+                
+                // FEATURE 2: REACTIVE GLOW (stronger on bass hits and peaks)
+                const glowIntensity = normalizedValue * 20;
+                if (normalizedValue > 0.5) {
+                    ctx.shadowBlur = glowIntensity;
+                    // Get color based on frequency range
+                    let glowColor;
+                    if (i < bars / 8) glowColor = 'rgba(255, 215, 0, 0.8)';
+                    else if (i < bars / 4) glowColor = 'rgba(255, 140, 0, 0.8)';
+                    else if (i < bars / 2) glowColor = 'rgba(255, 110, 199, 0.8)';
+                    else glowColor = 'rgba(0, 255, 204, 0.8)';
+                    
+                    ctx.shadowColor = glowColor;
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(x, barTop, barWidth, barHeight);
                     ctx.shadowBlur = 0;
                 }
                 
-                // Add peak dots for very high values
-                if (value > 220) {
+                // FEATURE 3: PEAK HOLD DOTS
+                // Update peak hold
+                if (barHeight > peakHolds[i]) {
+                    peakHolds[i] = barHeight;
+                } else {
+                    peakHolds[i] *= peakFallRate; // Slowly fall
+                }
+                
+                // Draw peak dot
+                if (peakHolds[i] > 5) {
+                    const peakY = centerY - peakHolds[i];
                     ctx.beginPath();
-                    ctx.arc(x + barWidth/2, y - 3, 2, 0, Math.PI * 2);
-                    ctx.fillStyle = `rgba(255, 255, 255, ${(value - 220) / 35})`;
+                    ctx.arc(x + barWidth/2, peakY - 2, 2.5, 0, Math.PI * 2);
+                    // Match color to frequency range
+                    if (i < bars / 8) ctx.fillStyle = 'rgba(255, 215, 0, 0.9)';
+                    else if (i < bars / 4) ctx.fillStyle = 'rgba(255, 140, 0, 0.9)';
+                    else if (i < bars / 2) ctx.fillStyle = 'rgba(255, 110, 199, 0.9)';
+                    else ctx.fillStyle = 'rgba(0, 255, 204, 0.9)';
                     ctx.fill();
+                    
+                    // Add glow to peak dot
+                    ctx.shadowBlur = 5;
+                    ctx.shadowColor = ctx.fillStyle;
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                }
                 }
             }
         }
