@@ -2016,10 +2016,6 @@
             bodyEl.style.setProperty('--grid-opacity-bg', gridOpacity);
             bodyEl.style.setProperty('--grid-speed', gridSpeed + 's');
             
-            const gridOpacity = 0.4 + (bassIntensity * 0.6);
-            const gridScale = 2 + (bassIntensity * 0.8);
-            const backgroundGlowIntensity = 0.12 + (avgValue / 255) * 0.3;
-            
             // Update walkman inner grid (keeping existing behavior)
             const walkmanGridOpacity = 0.4 + (bassIntensity * 0.6);
             const walkmanGridScale = 2 + (bassIntensity * 0.8);
