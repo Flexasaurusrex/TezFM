@@ -1193,11 +1193,29 @@
         }
 
         .playlist-item.active {
-            background: rgba(255, 110, 199, 0.15);
-            border-left-color: #ff6ec7;
+            background: linear-gradient(90deg, rgba(255, 215, 0, 0.25), rgba(255, 110, 199, 0.2));
+            border-left-color: #ffd700;
+            border-left-width: 6px;
             box-shadow: 
-                0 4px 12px rgba(255, 110, 199, 0.4),
-                inset 0 0 20px rgba(255, 110, 199, 0.1);
+                0 6px 20px rgba(255, 215, 0, 0.5),
+                inset 0 0 30px rgba(255, 215, 0, 0.2),
+                0 0 40px rgba(255, 215, 0, 0.3);
+            animation: activeGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes activeGlow {
+            0%, 100% { 
+                box-shadow: 
+                    0 6px 20px rgba(255, 215, 0, 0.5),
+                    inset 0 0 30px rgba(255, 215, 0, 0.2),
+                    0 0 40px rgba(255, 215, 0, 0.3);
+            }
+            50% { 
+                box-shadow: 
+                    0 8px 25px rgba(255, 215, 0, 0.7),
+                    inset 0 0 40px rgba(255, 215, 0, 0.3),
+                    0 0 60px rgba(255, 215, 0, 0.5);
+            }
         }
 
         .playlist-item-title {
@@ -1208,18 +1226,35 @@
             font-family: 'Orbitron', sans-serif;
             text-shadow: 0 0 10px rgba(0, 255, 204, 0.6);
             padding-right: 25px;
-            cursor: pointer;
             transition: all 0.2s ease;
-        }
-
-        .playlist-item-title:hover {
-            color: #fff;
-            text-shadow: 0 0 15px rgba(0, 255, 204, 0.9);
+            position: relative;
         }
 
         .playlist-item-title a {
             color: inherit;
             text-decoration: none;
+            cursor: pointer;
+            border-bottom: 1px dotted rgba(0, 255, 204, 0.4);
+            padding-bottom: 2px;
+            display: inline-block;
+        }
+
+        .playlist-item-title a:hover {
+            color: #fff;
+            text-shadow: 0 0 15px rgba(0, 255, 204, 0.9);
+            border-bottom-color: rgba(255, 255, 255, 0.8);
+            border-bottom-style: solid;
+        }
+
+        .playlist-item-title a::after {
+            content: ' ↗';
+            font-size: 10px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .playlist-item-title a:hover::after {
+            opacity: 1;
         }
 
         .playlist-item-artist {
@@ -1817,7 +1852,20 @@
             
             for (let i = 0; i < bars; i++) {
                 const dataIndex = Math.floor((i / bars) * bufferLength);
-                const value = dataArray[dataIndex] || 0;
+                let value = dataArray[dataIndex] || 0;
+                
+                // Boost high frequencies, compress bass
+                if (i < bars / 3) {
+                    // Bass - compress by 30%
+                    value = value * 0.7;
+                } else if (i > bars * 2 / 3) {
+                    // Highs - boost by 60%
+                    value = Math.min(255, value * 1.6);
+                } else {
+                    // Mids - slight boost
+                    value = Math.min(255, value * 1.2);
+                }
+                
                 const barHeight = (value / 255) * height * 0.9;
                 
                 // Calculate x position
@@ -1827,21 +1875,21 @@
                 // Create chromatic gradient based on position (frequency)
                 const gradient = ctx.createLinearGradient(x, height, x, y);
                 
-                // Color mapping: Bass (yellow) → Mids (pink/purple) → Highs (cyan)
-                if (i < bars / 4) {
-                    // Bass - Yellow to Gold
+                // Color mapping: Faster transitions, full spectrum coverage
+                if (i < bars / 6) {
+                    // Bass - Yellow (0-16%)
                     gradient.addColorStop(0, `rgba(255, 215, 0, ${0.8 + value/255 * 0.2})`);
                     gradient.addColorStop(1, `rgba(255, 255, 100, ${0.6 + value/255 * 0.4})`);
-                } else if (i < bars / 2) {
-                    // Low-mids - Orange to Pink
+                } else if (i < bars / 3) {
+                    // Low-mids - Orange to Pink (16-33%)
                     gradient.addColorStop(0, `rgba(255, 140, 0, ${0.8 + value/255 * 0.2})`);
                     gradient.addColorStop(1, `rgba(255, 110, 199, ${0.6 + value/255 * 0.4})`);
-                } else if (i < (bars * 3) / 4) {
-                    // High-mids - Pink to Purple
+                } else if (i < bars * 2 / 3) {
+                    // Mids - Pink to Purple (33-66%)
                     gradient.addColorStop(0, `rgba(255, 110, 199, ${0.8 + value/255 * 0.2})`);
                     gradient.addColorStop(1, `rgba(120, 115, 245, ${0.6 + value/255 * 0.4})`);
                 } else {
-                    // Highs - Purple to Cyan
+                    // Highs - Purple to Cyan (66-100%)
                     gradient.addColorStop(0, `rgba(120, 115, 245, ${0.8 + value/255 * 0.2})`);
                     gradient.addColorStop(1, `rgba(0, 255, 204, ${0.6 + value/255 * 0.4})`);
                 }
