@@ -1883,7 +1883,14 @@
                 const nextVal = smoothedValues[i + 1] || smoothedValues[i];
                 const smoothedValue = (prevVal + smoothedValues[i] * 2 + nextVal) / 4;
                 
-                const barHeight = (smoothedValue / 255) * height * 0.9;
+                // Compress peaks to keep wave-like motion (logarithmic scaling)
+                let normalizedValue = smoothedValue / 255;
+                // Apply soft ceiling - compress values above 0.7 to prevent spikes
+                if (normalizedValue > 0.7) {
+                    normalizedValue = 0.7 + (normalizedValue - 0.7) * 0.3; // Compress top 30%
+                }
+                
+                const barHeight = normalizedValue * height * 0.85; // Use 85% max height
                 
                 // Calculate x position
                 const x = i * barWidth;
