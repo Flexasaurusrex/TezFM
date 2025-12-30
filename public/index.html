@@ -1875,22 +1875,22 @@
                     value = Math.min(255, value * 2.8);
                 }
                 
-                // Smooth values for wave-like motion (lerp toward current value)
-                smoothedValues[i] += (value - smoothedValues[i]) * 0.3; // 30% smoothing
+                // Light smoothing for wave-like motion (more responsive)
+                smoothedValues[i] += (value - smoothedValues[i]) * 0.6; // 60% responsiveness
                 
-                // Add neighbor averaging for smoother waves
+                // Gentle neighbor blending for wave continuity
                 const prevVal = smoothedValues[i - 1] || smoothedValues[i];
                 const nextVal = smoothedValues[i + 1] || smoothedValues[i];
-                const smoothedValue = (prevVal + smoothedValues[i] * 2 + nextVal) / 4;
+                const smoothedValue = (prevVal * 0.15 + smoothedValues[i] * 0.7 + nextVal * 0.15);
                 
                 // Compress peaks to keep wave-like motion (logarithmic scaling)
                 let normalizedValue = smoothedValue / 255;
                 // Apply soft ceiling - compress values above 0.7 to prevent spikes
                 if (normalizedValue > 0.7) {
-                    normalizedValue = 0.7 + (normalizedValue - 0.7) * 0.3; // Compress top 30%
+                    normalizedValue = 0.7 + (normalizedValue - 0.7) * 0.4; // Less aggressive compression
                 }
                 
-                const barHeight = normalizedValue * height * 0.85; // Use 85% max height
+                const barHeight = normalizedValue * height * 0.88; // Use 88% max height
                 
                 // Calculate x position
                 const x = i * barWidth;
