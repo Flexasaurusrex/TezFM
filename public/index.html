@@ -1857,16 +1857,19 @@
                 const dataIndex = Math.floor((i / bars) * bufferLength);
                 let value = dataArray[dataIndex] || 0;
                 
-                // Boost high frequencies, compress bass
-                if (i < bars / 3) {
-                    // Bass - compress by 30%
-                    value = value * 0.7;
-                } else if (i > bars * 2 / 3) {
-                    // Highs - boost by 60%
-                    value = Math.min(255, value * 1.6);
+                // AGGRESSIVE frequency balancing - no empty spaces!
+                if (i < bars / 4) {
+                    // Bass - CRUSH IT (50% reduction)
+                    value = value * 0.5;
+                } else if (i < bars / 2) {
+                    // Low-mids - boost moderately (vocals, guitars)
+                    value = Math.min(255, value * 1.8);
+                } else if (i < bars * 3 / 4) {
+                    // High-mids - BOOST HARD (2.5x)
+                    value = Math.min(255, value * 2.5);
                 } else {
-                    // Mids - slight boost
-                    value = Math.min(255, value * 1.2);
+                    // Highs - BOOST INSANE (3x for visibility)
+                    value = Math.min(255, value * 3.0);
                 }
                 
                 const barHeight = (value / 255) * height * 0.9;
