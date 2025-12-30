@@ -1898,7 +1898,9 @@
                     normalizedValue = 0.7 + (normalizedValue - 0.7) * 0.4; // Less aggressive compression
                 }
                 
-                const barHeight = normalizedValue * height * 0.88; // Use 88% max height
+                // Add subtle variation to prevent solid flat bars (micro-jitter)
+                const variation = (Math.sin(Date.now() * 0.002 + i * 0.5) * 0.03); // ±3% variation
+                const barHeight = normalizedValue * height * (0.88 + variation);
                 
                 // Calculate x position
                 const x = i * barWidth;
