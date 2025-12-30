@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>TEZ FM - Tezos NFT Radio</title>
     
@@ -1764,6 +1767,7 @@
         // Retrowave visualizer animation - BADASS VERSION
         let lastPulseTime = 0;
         const pulseThreshold = 100; // Minimum ms between pulses
+        let smoothedValues = new Array(64).fill(0); // For smooth wave motion
         
         function drawVisualizer() {
             animationId = requestAnimationFrame(drawVisualizer);
@@ -1854,25 +1858,32 @@
             const barWidth = width / bars;
             
             for (let i = 0; i < bars; i++) {
-                const dataIndex = Math.floor((i / bars) * bufferLength);
+                // Map ALL bars to mid-range frequencies only (ignore useless highs)
+                // Use only the first 60% of frequency data where actual music lives
+                const dataIndex = Math.floor((i / bars) * (bufferLength * 0.6));
                 let value = dataArray[dataIndex] || 0;
                 
-                // AGGRESSIVE frequency balancing - no empty spaces!
-                if (i < bars / 4) {
-                    // Bass - CRUSH IT (50% reduction)
-                    value = value * 0.5;
-                } else if (i < bars / 2) {
-                    // Low-mids - boost moderately (vocals, guitars)
-                    value = Math.min(255, value * 1.8);
-                } else if (i < bars * 3 / 4) {
-                    // High-mids - BOOST HARD (2.5x)
-                    value = Math.min(255, value * 2.5);
+                // AGGRESSIVE frequency balancing - full spectrum coverage
+                if (i < bars / 6) {
+                    // Bass - CRUSH IT (40% reduction)
+                    value = value * 0.6;
+                } else if (i < bars / 3) {
+                    // Low-mids - moderate boost
+                    value = Math.min(255, value * 1.5);
                 } else {
-                    // Highs - BOOST INSANE (3x for visibility)
-                    value = Math.min(255, value * 3.0);
+                    // Everything else - MASSIVE BOOST (vocals, instruments)
+                    value = Math.min(255, value * 2.8);
                 }
                 
-                const barHeight = (value / 255) * height * 0.9;
+                // Smooth values for wave-like motion (lerp toward current value)
+                smoothedValues[i] += (value - smoothedValues[i]) * 0.3; // 30% smoothing
+                
+                // Add neighbor averaging for smoother waves
+                const prevVal = smoothedValues[i - 1] || smoothedValues[i];
+                const nextVal = smoothedValues[i + 1] || smoothedValues[i];
+                const smoothedValue = (prevVal + smoothedValues[i] * 2 + nextVal) / 4;
+                
+                const barHeight = (smoothedValue / 255) * height * 0.9;
                 
                 // Calculate x position
                 const x = i * barWidth;
@@ -1881,21 +1892,21 @@
                 // Create chromatic gradient based on position (frequency)
                 const gradient = ctx.createLinearGradient(x, height, x, y);
                 
-                // Color mapping: Faster transitions, full spectrum coverage
-                if (i < bars / 6) {
-                    // Bass - Yellow (0-16%)
+                // Color mapping: Yellow → Orange → Pink → Purple → Cyan spread evenly
+                if (i < bars / 8) {
+                    // Bass - Yellow (0-12.5%)
                     gradient.addColorStop(0, `rgba(255, 215, 0, ${0.8 + value/255 * 0.2})`);
                     gradient.addColorStop(1, `rgba(255, 255, 100, ${0.6 + value/255 * 0.4})`);
-                } else if (i < bars / 3) {
-                    // Low-mids - Orange to Pink (16-33%)
+                } else if (i < bars / 4) {
+                    // Low-mids - Orange to Pink (12.5-25%)
                     gradient.addColorStop(0, `rgba(255, 140, 0, ${0.8 + value/255 * 0.2})`);
                     gradient.addColorStop(1, `rgba(255, 110, 199, ${0.6 + value/255 * 0.4})`);
-                } else if (i < bars * 2 / 3) {
-                    // Mids - Pink to Purple (33-66%)
+                } else if (i < bars / 2) {
+                    // Mids - Pink to Purple (25-50%)
                     gradient.addColorStop(0, `rgba(255, 110, 199, ${0.8 + value/255 * 0.2})`);
                     gradient.addColorStop(1, `rgba(120, 115, 245, ${0.6 + value/255 * 0.4})`);
                 } else {
-                    // Highs - Purple to Cyan (66-100%)
+                    // Everything else - Purple to Cyan (50-100%)
                     gradient.addColorStop(0, `rgba(120, 115, 245, ${0.8 + value/255 * 0.2})`);
                     gradient.addColorStop(1, `rgba(0, 255, 204, ${0.6 + value/255 * 0.4})`);
                 }
