@@ -2389,6 +2389,20 @@
             }
         });
 
+        // Fix mobile paste - preserve line breaks
+        const bulkInput = document.getElementById('bulkInput');
+        if (bulkInput) {
+            bulkInput.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+                const cursorPos = bulkInput.selectionStart;
+                const textBefore = bulkInput.value.substring(0, cursorPos);
+                const textAfter = bulkInput.value.substring(bulkInput.selectionEnd);
+                bulkInput.value = textBefore + pastedText + textAfter;
+                bulkInput.selectionStart = bulkInput.selectionEnd = cursorPos + pastedText.length;
+            });
+        }
+
         // Start visualizer even when paused for aesthetic
         drawVisualizer();
     </script>
