@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tezos-walkman-v2';
+const CACHE_NAME = 'tezos-walkman-v4';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -21,18 +21,25 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// Fetch from cache, fallback to network
+// NETWORK FIRST - Fetch from network, fallback to cache
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request)
+    fetch(event.request)
       .then((response) => {
-        // Cache hit - return response
-        if (response) {
-          return response;
-        }
-        return fetch(event.request);
-      }
-    )
+        // Clone response for cache
+        const responseToCache = response.clone();
+        
+        caches.open(CACHE_NAME)
+          .then((cache) => {
+            cache.put(event.request, responseToCache);
+          });
+        
+        return response;
+      })
+      .catch(() => {
+        // Network failed, try cache
+        return caches.match(event.request);
+      })
   );
 });
 
