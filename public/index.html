@@ -544,11 +544,11 @@
         .progress-bar {
             height: 100%;
             width: 0%;
-            background: linear-gradient(90deg, #ff6ec7, #7873f5, #00ffcc);
+            background: linear-gradient(90deg, #ffd700, #ffaa00);
             transition: width 0.3s ease;
             box-shadow: 
-                0 0 15px rgba(0, 255, 204, 0.8),
-                0 0 30px rgba(255, 110, 199, 0.6);
+                0 0 15px rgba(255, 215, 0, 0.8),
+                0 0 30px rgba(255, 215, 0, 0.6);
             position: relative;
         }
 
@@ -558,6 +558,26 @@
             top: 0;
             right: 0;
             width: 4px;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 0 8px rgba(255, 215, 0, 1);
+        }
+
+        .progress-time {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            padding: 0 5px;
+        }
+
+        .progress-time span {
+            font-size: 9px;
+            color: #ffd700;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 600;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+        }
+
             height: 100%;
             background: #fff;
             box-shadow: 0 0 8px #fff;
@@ -1374,6 +1394,10 @@
                 <div class="progress-container">
                     <div class="progress-bar" id="progressBar"></div>
                 </div>
+                <div class="progress-time">
+                    <span id="currentTime">0:00</span>
+                    <span id="duration">0:00</span>
+                </div>
             </div>
 
             <!-- Input section -->
@@ -1647,9 +1671,11 @@
 
         // Set canvas size
         function resizeCanvas() {
-            const pod = document.querySelector('.control-pod');
-            canvas.width = pod.offsetWidth;
-            canvas.height = pod.offsetHeight;
+            const container = document.querySelector('.spectrum-container');
+            if (container) {
+                canvas.width = container.offsetWidth;
+                canvas.height = 100; // Match CSS height
+            }
         }
         resizeCanvas();
         window.addEventListener('resize', resizeCanvas);
@@ -2252,11 +2278,23 @@
             }
         }
 
+        // Format time helper
+        function formatTime(seconds) {
+            if (isNaN(seconds) || seconds === Infinity) return '0:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
         // Audio/Video event listeners
         function setupPlayerListeners(player) {
             player.addEventListener('timeupdate', () => {
                 const progress = (player.currentTime / player.duration) * 100;
                 progressBar.style.width = progress + '%';
+                
+                // Update timestamps
+                document.getElementById('currentTime').textContent = formatTime(player.currentTime);
+                document.getElementById('duration').textContent = formatTime(player.duration);
                 
                 // Update media session position for lock screen scrubber
                 if ('mediaSession' in navigator && 'setPositionState' in navigator.mediaSession) {
@@ -2435,15 +2473,17 @@
                 
                 let successCount = 0;
                 const maxTracks = 100; // Load max 100 random tracks
+                const maxPerArtist = 3; // Max 3 tracks per artist for variety
+                const artistCounts = {}; // Track how many tracks per artist
                 
                 // Shuffle and take subset
-                const shuffled = tokens.sort(() => Math.random() - 0.5).slice(0, maxTracks);
+                const shuffled = tokens.sort(() => Math.random() - 0.5);
                 
-                for (let i = 0; i < shuffled.length; i++) {
+                for (let i = 0; i < shuffled.length && successCount < maxTracks; i++) {
                     const token = shuffled[i];
                     const url = `https://objkt.com/tokens/${token.fa_contract}/${token.token_id}`;
                     
-                    loading.textContent = `LOADING ${i + 1}/${shuffled.length}...`;
+                    loading.textContent = `LOADING ${successCount + 1}/${maxTracks}...`;
                     
                     try {
                         const trackData = await fetchNFTData(url);
@@ -2455,13 +2495,18 @@
                             continue;
                         }
                         
+                        // Check artist diversity - limit tracks per artist
+                        const artist = trackData.artist || 'Unknown';
+                        artistCounts[artist] = (artistCounts[artist] || 0) + 1;
+                        
+                        if (artistCounts[artist] > maxPerArtist) {
+                            console.log(`Skipping ${artist} - already have ${maxPerArtist} tracks`);
+                            continue;
+                        }
+                        
                         playlist.push(trackData);
                         successCount++;
                         
-                        // Stop if we have enough tracks
-                        if (successCount >= 100) {
-                            break;
-                        }
                     } catch (error) {
                         console.error(`Failed to load ${url}:`, error);
                     }
