@@ -2655,7 +2655,7 @@
                     loading.textContent = `LOADING ${i + 1}/${shuffled.length}...`;
                     
                     try {
-                        const trackData = await fetchTokenData(url);
+                        const trackData = await fetchNFTData(url);
                         playlist.push(trackData);
                         successCount++;
                     } catch (error) {
