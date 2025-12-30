@@ -2592,18 +2592,17 @@
             try {
                 // Query Objkt.com API for random audio NFTs
                 // Using a random offset to get different results each time
-                const randomOffset = Math.floor(Math.random() * 1000);
+                const randomOffset = Math.floor(Math.random() * 500);
                 const limit = 30; // Try to get 30, will filter down
                 
                 const response = await fetch(`https://data.objkt.com/v3/graphql`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        query: `{
+                        query: `query GetAudioTokens {
                             token(
                                 where: {
-                                    mime_type: {_eq: "audio/mpeg"},
-                                    artifact_uri: {_is_null: false}
+                                    mime: {_eq: "audio/mpeg"}
                                 },
                                 limit: ${limit},
                                 offset: ${randomOffset},
@@ -2612,7 +2611,7 @@
                                 token_id
                                 fa_contract
                                 name
-                                mime_type
+                                mime
                             }
                         }`
                     })
