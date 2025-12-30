@@ -337,94 +337,16 @@
             }
         }
 
-        /* Status LEDs */
-        .status-leds {
-            position: absolute;
-            top: 30px;
-            left: 30px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        
-        @media (max-width: 480px) {
-            .status-leds {
-                top: 20px;
-                left: 20px;
-                gap: 8px;
-            }
-        }
-
-        .led-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .led {
-            width: 12px;
-            height: 12px;
-            background: 
-                radial-gradient(circle at 30% 30%, #ffd700, #ffaa00);
-            border-radius: 50%;
-            box-shadow: 
-                0 0 20px rgba(255, 215, 0, 1),
-                0 0 40px rgba(255, 215, 0, 0.6),
-                inset 0 -3px 6px rgba(0, 0, 0, 0.4),
-                inset 0 2px 4px rgba(255, 255, 255, 0.4);
-            position: relative;
-            animation: led-pulse 2s ease-in-out infinite;
-        }
-
-        @keyframes led-pulse {
-            0%, 100% { box-shadow: 0 0 20px rgba(255, 215, 0, 1), 0 0 40px rgba(255, 215, 0, 0.6), inset 0 -3px 6px rgba(0, 0, 0, 0.4); }
-            50% { box-shadow: 0 0 30px rgba(255, 215, 0, 1), 0 0 60px rgba(255, 215, 0, 0.8), inset 0 -3px 6px rgba(0, 0, 0, 0.4); }
-        }
-
-        .led::after {
-            content: '';
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            width: 5px;
-            height: 5px;
-            background: rgba(255, 255, 255, 0.8);
-            border-radius: 50%;
-            filter: blur(1px);
-        }
-
-        .led.off {
-            background: 
-                radial-gradient(circle at 30% 30%, #3a3a00, #1a1a00);
-            box-shadow: 
-                inset 0 2px 6px rgba(0, 0, 0, 0.9),
-                0 1px 2px rgba(0, 0, 0, 0.5);
-            animation: none;
-        }
-
-        .led.off::after {
-            display: none;
-        }
-
-        .led-label {
-            font-size: 9px;
-            font-weight: 700;
-            color: #ffd700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
-        }
-
         /* Spectrum visualizer - compact square */
         .spectrum-container {
             width: 100%;
-            margin: 0 auto 20px;
+            margin: 15px auto 25px;
             position: relative;
         }
         
         .visualizer {
             width: 100%;
-            height: 80px;
+            height: 100px;
             background: 
                 linear-gradient(180deg, #0a0a15, #1e1e2e);
             border-radius: 8px;
@@ -438,8 +360,12 @@
         }
         
         @media (max-width: 480px) {
+            .spectrum-container {
+                margin: 10px auto 20px;
+            }
+            
             .visualizer {
-                height: 70px;
+                height: 80px;
                 border-width: 2px;
             }
         }
@@ -732,6 +658,7 @@
             transition: all 0.3s ease;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            flex: 1;
         }
 
         .bulk-toggle-btn:hover {
@@ -950,26 +877,25 @@
         }
 
         .submit-playlist-btn {
-            background: linear-gradient(145deg, rgba(120, 115, 245, 0.3), rgba(120, 115, 245, 0.2));
-            border: 3px solid rgba(120, 115, 245, 0.4);
-            border-radius: 10px;
-            padding: 10px 20px;
+            background: rgba(120, 115, 245, 0.2);
+            border: 2px solid rgba(120, 115, 245, 0.4);
+            border-radius: 8px;
+            padding: 8px 16px;
             color: #7873f5;
             font-family: 'Orbitron', sans-serif;
             font-size: 11px;
-            font-weight: 900;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            box-shadow: 0 4px 12px rgba(120, 115, 245, 0.2);
+            letter-spacing: 0.5px;
+            flex: 1;
         }
 
         .submit-playlist-btn:hover {
-            background: linear-gradient(145deg, rgba(120, 115, 245, 0.4), rgba(120, 115, 245, 0.3));
+            background: rgba(120, 115, 245, 0.3);
             border-color: rgba(120, 115, 245, 0.6);
-            box-shadow: 0 6px 18px rgba(120, 115, 245, 0.4);
-            transform: translateY(-2px);
+            box-shadow: 0 0 15px rgba(120, 115, 245, 0.3);
         }
 
         /* Random Discovery Button */
@@ -1011,8 +937,9 @@
         /* Info Button & Modal */
         .info-btn {
             position: absolute;
-            top: 70px;
-            right: 30px;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
             width: 32px;
             height: 32px;
             background: linear-gradient(145deg, rgba(0, 255, 204, 0.2), rgba(0, 255, 204, 0.1));
@@ -1159,8 +1086,7 @@
 
         @media (max-width: 480px) {
             .info-btn {
-                top: 60px;
-                right: 20px;
+                top: 12px;
                 width: 28px;
                 height: 28px;
                 font-size: 16px;
@@ -1429,18 +1355,6 @@
             <!-- Info Button -->
             <div class="info-btn" onclick="toggleInfo()">ℹ</div>
 
-            <!-- Status LEDs -->
-            <div class="status-leds">
-                <div class="led-row">
-                    <div class="led" id="led1"></div>
-                    <div class="led-label">ON/PLAY</div>
-                </div>
-                <div class="led-row">
-                    <div class="led off" id="led2"></div>
-                    <div class="led-label">FM STEREO</div>
-                </div>
-            </div>
-
             <!-- Spectrum Visualizer -->
             <div class="spectrum-container">
                 <canvas class="visualizer" id="visualizer"></canvas>
@@ -1472,8 +1386,9 @@
                     >
                     <button class="add-btn" onclick="addTrack()">ADD</button>
                 </div>
-                <div style="text-align: center; margin: 10px 0;">
+                <div style="display: flex; gap: 10px; justify-content: center; margin: 10px 0;">
                     <button class="bulk-toggle-btn" onclick="toggleBulkMode()" id="bulkToggleBtn">📋 Bulk Add</button>
+                    <button class="submit-playlist-btn" onclick="openSubmitForm()">📝 Submit Playlist</button>
                 </div>
                 <div class="bulk-input-wrapper" id="bulkInputWrapper" style="display: none;">
                     <textarea 
@@ -1510,11 +1425,6 @@
             <div class="playlist" id="playlist"></div>
 
             <div class="status" id="status">Playlist empty</div>
-            
-            <!-- Submit Playlist Button -->
-            <div style="text-align: center; margin-top: 15px;">
-                <button class="submit-playlist-btn" onclick="openSubmitForm()">📝 Submit Your Playlist</button>
-            </div>
         </div>
     </div>
 
@@ -2301,7 +2211,6 @@
             activePlayer.play();
             isPlaying = true;
             playBtn.innerHTML = '⏸';
-            document.getElementById('led1').classList.remove('off');
             startVisualizer();
             updateMediaSession();
         }
@@ -2310,7 +2219,6 @@
             activePlayer.pause();
             isPlaying = false;
             playBtn.innerHTML = '▶';
-            document.getElementById('led1').classList.add('off');
         }
 
         function nextTrack() {
@@ -2604,7 +2512,6 @@
                 document.getElementById('trackTitle').textContent = 'Ready to play';
                 document.getElementById('trackArtist').textContent = 'Add Objkt NFT link to begin';
                 document.getElementById('playBtn').innerHTML = '▶';
-                document.getElementById('led1').classList.add('off');
                 document.getElementById('progressBar').style.width = '0%';
                 
                 updatePlaylist();
