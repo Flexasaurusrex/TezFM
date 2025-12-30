@@ -16,7 +16,7 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://tezfm.xyz/">
     <meta property="og:title" content="TEZ FM - Tezos NFT Radio">
-    <meta property="og:description" content="🎵 Stream your Tezos music NFTs with retrowave style. Lock screen controls, playlists, and audio visualization. The radio station for Tezos audio NFTs.">
+    <meta property="og:description" content="ðµ Stream your Tezos music NFTs with retrowave style. Lock screen controls, playlists, and audio visualization. The radio station for Tezos audio NFTs.">
     <meta property="og:image" content="https://tezfm.xyz/social-card.png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
@@ -25,7 +25,7 @@
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://tezfm.xyz/">
     <meta property="twitter:title" content="TEZ FM - Tezos NFT Radio">
-    <meta property="twitter:description" content="🎵 Stream your Tezos music NFTs with retrowave style. Lock screen controls, playlists, and audio visualization. The radio station for Tezos audio NFTs.">
+    <meta property="twitter:description" content="ðµ Stream your Tezos music NFTs with retrowave style. Lock screen controls, playlists, and audio visualization. The radio station for Tezos audio NFTs.">
     <meta property="twitter:image" content="https://tezfm.xyz/social-card.png">
     
     <!-- Favicons -->
@@ -1213,9 +1213,9 @@
 
             <!-- Controls below visualizer -->
             <div class="controls">
-                <button class="control-btn" onclick="previousTrack()" title="Previous">⏮</button>
-                <button class="control-btn play" onclick="togglePlay()" id="playBtn" title="Play/Pause">▶</button>
-                <button class="control-btn" onclick="nextTrack()" title="Next">⏭</button>
+                <button class="control-btn" onclick="previousTrack()" title="Previous">â®</button>
+                <button class="control-btn play" onclick="togglePlay()" id="playBtn" title="Play/Pause">â¶</button>
+                <button class="control-btn" onclick="nextTrack()" title="Next">â­</button>
             </div>
 
             <!-- Track display -->
@@ -1238,7 +1238,7 @@
                     <button class="add-btn" onclick="addTrack()">ADD</button>
                 </div>
                 <div style="text-align: center; margin: 10px 0;">
-                    <button class="bulk-toggle-btn" onclick="toggleBulkMode()" id="bulkToggleBtn">📋 Bulk Add</button>
+                    <button class="bulk-toggle-btn" onclick="toggleBulkMode()" id="bulkToggleBtn">ð Bulk Add</button>
                 </div>
                 <div class="bulk-input-wrapper" id="bulkInputWrapper" style="display: none;">
                     <textarea 
@@ -1255,7 +1255,7 @@
             <!-- Featured Playlists Section -->
             <div class="featured-section">
                 <button class="featured-toggle-btn" onclick="toggleFeatured()" id="featuredToggleBtn">
-                    ⭐ Featured Playlists
+                    â­ Featured Playlists
                 </button>
                 <div class="featured-playlists" id="featuredPlaylists" style="display: none;">
                     <!-- Playlists will be loaded here -->
@@ -1265,7 +1265,7 @@
             <!-- Playlist -->
             <div class="playlist-header">
                 <span class="playlist-title">My Playlist</span>
-                <button class="clear-all-btn" onclick="clearAllTracks()" title="Clear all tracks">🗑️ Clear All</button>
+                <button class="clear-all-btn" onclick="clearAllTracks()" title="Clear all tracks">ðï¸ Clear All</button>
             </div>
             <div class="playlist" id="playlist"></div>
 
@@ -1273,7 +1273,7 @@
             
             <!-- Submit Playlist Button -->
             <div style="text-align: center; margin-top: 15px;">
-                <button class="submit-playlist-btn" onclick="openSubmitForm()">📝 Submit Your Playlist</button>
+                <button class="submit-playlist-btn" onclick="openSubmitForm()">ð Submit Your Playlist</button>
             </div>
         </div>
     </div>
@@ -1856,10 +1856,10 @@
             
             if (bulkWrapper.style.display === 'none') {
                 bulkWrapper.style.display = 'block';
-                toggleBtn.textContent = '➖ Hide Bulk Add';
+                toggleBtn.textContent = 'â Hide Bulk Add';
             } else {
                 bulkWrapper.style.display = 'none';
-                toggleBtn.textContent = '📋 Bulk Add';
+                toggleBtn.textContent = 'ð Bulk Add';
             }
         }
 
@@ -1919,9 +1919,9 @@
             }
             
             // Show results
-            let message = `✅ Added ${successCount} track${successCount !== 1 ? 's' : ''}`;
+            let message = `â Added ${successCount} track${successCount !== 1 ? 's' : ''}`;
             if (failCount > 0) {
-                message += `\n❌ Failed: ${failCount}`;
+                message += `\nâ Failed: ${failCount}`;
                 if (errors.length <= 3) {
                     message += '\n\n' + errors.join('\n');
                 }
@@ -1941,7 +1941,7 @@
                 
                 // Add delete button
                 const deleteBtn = document.createElement('span');
-                deleteBtn.innerHTML = '✕';
+                deleteBtn.innerHTML = 'â';
                 deleteBtn.className = 'delete-btn';
                 deleteBtn.onclick = (e) => {
                     e.stopPropagation();
@@ -2037,7 +2037,7 @@
             
             activePlayer.play();
             isPlaying = true;
-            playBtn.innerHTML = '⏸';
+            playBtn.innerHTML = 'â¸';
             document.getElementById('led1').classList.remove('off');
             startVisualizer();
             updateMediaSession();
@@ -2046,7 +2046,7 @@
         function pause() {
             activePlayer.pause();
             isPlaying = false;
-            playBtn.innerHTML = '▶';
+            playBtn.innerHTML = 'â¶';
             document.getElementById('led1').classList.add('off');
         }
 
@@ -2150,7 +2150,21 @@
                     "https://objkt.com/tokens/KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton/350"
                 ]
             }
-        ];
+        
+    {
+        name: "Sample Playlist ",
+        curator: "Flex",
+        tracks: [
+            "https://objkt.com/tokens/hicetnunc/874565",
+            "https://objkt.com/tokens/KT1KPV5bfcw6YoNqy6aKr9xxBKzX9Zjoot38/129",
+            "https://objkt.com/tokens/KT1F42ppKYxzambBgxvVt68He8RTT9bXoNVT/1",
+            "https://objkt.com/tokens/KT1CBDCBPDGD3VvXWZqBcAMw73gGn2GnQEmX/9",
+            "https://objkt.com/tokens/KT1F42ppKYxzambBgxvVt68He8RTT9bXoNVT/2",
+            "https://objkt.com/tokens/KT1U8C31zT2pB1jGV1RrFRQT5hoQ5jKZKp2c/4",
+            "https://objkt.com/tokens/KT1Pt6muka2vEUnrsRFEomYsR5Mv2YZkQVrZ/66",
+        ]
+    },
+];
 
         function toggleFeatured() {
             const featuredDiv = document.getElementById('featuredPlaylists');
@@ -2158,11 +2172,11 @@
             
             if (featuredDiv.style.display === 'none') {
                 featuredDiv.style.display = 'block';
-                toggleBtn.textContent = '➖ Featured Playlists';
+                toggleBtn.textContent = 'â Featured Playlists';
                 loadFeaturedPlaylists();
             } else {
                 featuredDiv.style.display = 'none';
-                toggleBtn.textContent = '⭐ Featured Playlists';
+                toggleBtn.textContent = 'â­ Featured Playlists';
             }
         }
 
@@ -2178,7 +2192,7 @@
                     <div class="featured-playlist-name">${playlist.name}</div>
                     <div class="featured-playlist-curator">Curated by ${playlist.curator}</div>
                     <div class="featured-playlist-count">${playlist.tracks.length} tracks</div>
-                    <button class="copy-playlist-btn" onclick="copyPlaylistToClipboard(${index})">📋 Copy Playlist</button>
+                    <button class="copy-playlist-btn" onclick="copyPlaylistToClipboard(${index})">ð Copy Playlist</button>
                 `;
                 
                 container.appendChild(item);
@@ -2190,7 +2204,7 @@
             const playlistText = playlist.tracks.join('\n');
             
             navigator.clipboard.writeText(playlistText).then(() => {
-                alert(`✅ "${playlist.name}" copied to clipboard!\n\nNow paste into Bulk Add to load all tracks.`);
+                alert(`â "${playlist.name}" copied to clipboard!\n\nNow paste into Bulk Add to load all tracks.`);
             }).catch(err => {
                 // Fallback for older browsers
                 const textarea = document.createElement('textarea');
@@ -2199,7 +2213,7 @@
                 textarea.select();
                 document.execCommand('copy');
                 document.body.removeChild(textarea);
-                alert(`✅ "${playlist.name}" copied to clipboard!\n\nNow paste into Bulk Add to load all tracks.`);
+                alert(`â "${playlist.name}" copied to clipboard!\n\nNow paste into Bulk Add to load all tracks.`);
             });
         }
 
@@ -2219,7 +2233,7 @@
                 
                 document.getElementById('trackTitle').textContent = 'Ready to play';
                 document.getElementById('trackArtist').textContent = 'Add Objkt NFT link to begin';
-                document.getElementById('playBtn').innerHTML = '▶';
+                document.getElementById('playBtn').innerHTML = 'â¶';
                 document.getElementById('led1').classList.add('off');
                 document.getElementById('progressBar').style.width = '0%';
                 
@@ -2227,7 +2241,7 @@
                 updateStatus();
                 savePlaylistToStorage();
                 
-                alert('✅ Playlist cleared!');
+                alert('â Playlist cleared!');
             }
         }
 
@@ -2235,7 +2249,7 @@
             // Your Airtable form URL
             const formUrl = 'https://airtable.com/appMgBEe1gf7U8uji/pagN8xlyOY8dVKlfg/form';
             
-            if (confirm('📝 Submit Your Playlist!\n\nWant your curated playlist featured on TEZ FM?\n\nThis will open a form to submit your playlist.\n\nClick OK to continue.')) {
+            if (confirm('ð Submit Your Playlist!\n\nWant your curated playlist featured on TEZ FM?\n\nThis will open a form to submit your playlist.\n\nClick OK to continue.')) {
                 window.open(formUrl, '_blank');
             }
         }
