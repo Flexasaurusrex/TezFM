@@ -1979,11 +1979,24 @@
 
         async function bulkAddTracks() {
             const textarea = document.getElementById('bulkInput');
-            // Handle all line break types: \n, \r\n, \r
-            const urls = textarea.value
-                .split(/\r?\n|\r/)
-                .map(line => line.trim())
-                .filter(line => line.length > 0 && line.startsWith('http'));
+            
+            // Handle both line breaks AND spaces (mobile often pastes as one block)
+            // Split by line breaks first, then by spaces
+            const rawText = textarea.value;
+            let urls = [];
+            
+            // Try splitting by line breaks first
+            const lines = rawText.split(/\r?\n|\r/);
+            lines.forEach(line => {
+                // For each line, also check if there are space-separated URLs
+                const parts = line.split(/\s+/);
+                parts.forEach(part => {
+                    const trimmed = part.trim();
+                    if (trimmed.startsWith('http')) {
+                        urls.push(trimmed);
+                    }
+                });
+            });
             
             if (urls.length === 0) {
                 alert('Please paste at least one Objkt URL');
