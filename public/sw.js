@@ -1,9 +1,10 @@
 const CACHE_NAME = 'tezos-walkman-v1';
 const urlsToCache = [
-  './walkman-player.html',
-  './manifest.json',
-  './icon-192.png',
-  './icon-512.png'
+  '/',
+  '/index.html',
+  '/manifest.json',
+  '/icon-192.png',
+  '/icon-512.png'
 ];
 
 // Install service worker
