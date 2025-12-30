@@ -980,7 +980,6 @@
     </div>
 
     <audio id="audioPlayer" preload="auto" crossorigin="anonymous" style="display: none;"></audio>
-    <video id="videoPlayer" preload="auto" crossorigin="anonymous" style="display: none;"></video>
 
     <script>
         // Register Service Worker for PWA
@@ -1000,8 +999,7 @@
         let currentTrackIndex = -1;
         let isPlaying = false;
         const audioPlayer = document.getElementById('audioPlayer');
-        const videoPlayer = document.getElementById('videoPlayer');
-        let activePlayer = audioPlayer; // Track which player is active
+        let activePlayer = audioPlayer;
         const playBtn = document.getElementById('playBtn');
         const progressBar = document.getElementById('progressBar');
 
@@ -1622,21 +1620,11 @@
             
             const track = playlist[index];
             
-            // Determine if this is a video or audio file
-            const isVideo = track.mime && (track.mime.includes('video') || track.mime.includes('mp4') || track.mime.includes('webm'));
-            
-            // Pause both players first
+            // ALWAYS use audio player - it handles both audio and video files
+            // The video element extracts audio automatically via Web Audio API
             audioPlayer.pause();
-            videoPlayer.pause();
-            
-            // Set the active player based on file type
-            if (isVideo) {
-                activePlayer = videoPlayer;
-                videoPlayer.src = track.url;
-            } else {
-                activePlayer = audioPlayer;
-                audioPlayer.src = track.url;
-            }
+            audioPlayer.src = track.url;
+            activePlayer = audioPlayer;
             
             // Create Objkt URL
             const objktUrl = `https://objkt.com/tokens/${track.contract}/${track.tokenId}`;
@@ -1751,7 +1739,6 @@
         }
 
         setupPlayerListeners(audioPlayer);
-        setupPlayerListeners(videoPlayer);
 
         // Allow Enter key to add tracks
         document.getElementById('nftInput').addEventListener('keypress', (e) => {
@@ -1762,6 +1749,29 @@
 
         // Load saved playlist on page load
         loadPlaylistFromStorage();
+
+        // Keep audio playing even when page is hidden (background playback)
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && isPlaying) {
+                // Page is hidden but we want to keep playing
+                // Ensure audio context stays active
+                if (audioContext && audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+                // Make sure player doesn't pause
+                if (activePlayer.paused && isPlaying) {
+                    activePlayer.play().catch(err => console.log('Background play prevented:', err));
+                }
+            }
+        });
+
+        // Prevent audio from stopping when switching apps
+        window.addEventListener('blur', () => {
+            // Window lost focus but keep playing
+            if (isPlaying && audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+        });
 
         // Start visualizer even when paused for aesthetic
         drawVisualizer();
