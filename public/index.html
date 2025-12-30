@@ -749,6 +749,98 @@
             transform: translateY(-1px);
         }
 
+        .bulk-toggle-btn {
+            background: rgba(120, 115, 245, 0.2);
+            border: 2px solid rgba(120, 115, 245, 0.4);
+            border-radius: 8px;
+            padding: 8px 16px;
+            color: #7873f5;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .bulk-toggle-btn:hover {
+            background: rgba(120, 115, 245, 0.3);
+            border-color: rgba(120, 115, 245, 0.6);
+            box-shadow: 0 0 15px rgba(120, 115, 245, 0.3);
+        }
+
+        .bulk-input-wrapper {
+            margin-top: 15px;
+        }
+
+        textarea {
+            width: 100%;
+            background: rgba(15, 15, 31, 0.8);
+            border: 3px solid #1a1a1a;
+            border-radius: 10px;
+            padding: 12px 15px;
+            color: #00ffcc;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            outline: none;
+            box-shadow: 
+                inset 0 3px 10px rgba(0, 0, 0, 0.6),
+                0 2px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            resize: vertical;
+            margin-bottom: 10px;
+        }
+
+        textarea:focus {
+            border-color: #7873f5;
+            box-shadow: 
+                inset 0 3px 10px rgba(0, 0, 0, 0.6),
+                0 0 20px rgba(120, 115, 245, 0.4),
+                0 0 40px rgba(120, 115, 245, 0.2);
+            text-shadow: 0 0 8px rgba(120, 115, 245, 0.6);
+        }
+
+        textarea::placeholder {
+            color: rgba(120, 115, 245, 0.3);
+            font-weight: 400;
+        }
+
+        .bulk-add-btn {
+            width: 100%;
+            background: 
+                linear-gradient(145deg, #7873f5, #5a55d0);
+            border: 3px solid #0a0a0a;
+            border-radius: 10px;
+            padding: 12px 22px;
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 
+                0 6px 15px rgba(120, 115, 245, 0.4),
+                inset 0 2px 6px rgba(255, 255, 255, 0.3),
+                inset 0 -2px 6px rgba(0, 0, 0, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .bulk-add-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 
+                0 10px 25px rgba(120, 115, 245, 0.6),
+                0 0 40px rgba(120, 115, 245, 0.3),
+                inset 0 2px 6px rgba(255, 255, 255, 0.4),
+                inset 0 -2px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .bulk-add-btn:active {
+            transform: translateY(-1px);
+        }
+
         /* Playlist */
         .playlist {
             background: rgba(15, 15, 31, 0.6);
@@ -967,6 +1059,17 @@
                         placeholder="Paste Objkt.com NFT link..."
                     >
                     <button class="add-btn" onclick="addTrack()">ADD</button>
+                </div>
+                <div style="text-align: center; margin: 10px 0;">
+                    <button class="bulk-toggle-btn" onclick="toggleBulkMode()" id="bulkToggleBtn">📋 Bulk Add</button>
+                </div>
+                <div class="bulk-input-wrapper" id="bulkInputWrapper" style="display: none;">
+                    <textarea 
+                        id="bulkInput" 
+                        placeholder="Paste multiple Objkt links (one per line)&#10;&#10;Example:&#10;https://objkt.com/tokens/...&#10;https://objkt.com/tokens/...&#10;https://objkt.com/tokens/..."
+                        rows="6"
+                    ></textarea>
+                    <button class="bulk-add-btn" onclick="bulkAddTracks()">ADD ALL</button>
                 </div>
             </div>
 
@@ -1551,6 +1654,85 @@
             }
         }
 
+        function toggleBulkMode() {
+            const bulkWrapper = document.getElementById('bulkInputWrapper');
+            const toggleBtn = document.getElementById('bulkToggleBtn');
+            
+            if (bulkWrapper.style.display === 'none') {
+                bulkWrapper.style.display = 'block';
+                toggleBtn.textContent = '➖ Hide Bulk Add';
+            } else {
+                bulkWrapper.style.display = 'none';
+                toggleBtn.textContent = '📋 Bulk Add';
+            }
+        }
+
+        async function bulkAddTracks() {
+            const textarea = document.getElementById('bulkInput');
+            const urls = textarea.value
+                .split('\n')
+                .map(line => line.trim())
+                .filter(line => line.length > 0);
+            
+            if (urls.length === 0) {
+                alert('Please paste at least one Objkt URL');
+                return;
+            }
+
+            const loading = document.getElementById('loading');
+            loading.classList.add('active');
+            
+            let successCount = 0;
+            let failCount = 0;
+            const errors = [];
+
+            for (let i = 0; i < urls.length; i++) {
+                const url = urls[i];
+                loading.textContent = `LOADING ${i + 1}/${urls.length}...`;
+                
+                try {
+                    const trackData = await fetchNFTData(url);
+                    playlist.push(trackData);
+                    successCount++;
+                } catch (error) {
+                    failCount++;
+                    errors.push(`Line ${i + 1}: ${error.message}`);
+                    console.error(`Failed to load ${url}:`, error);
+                }
+                
+                // Small delay to avoid rate limiting
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+
+            loading.classList.remove('active');
+            loading.textContent = 'LOADING TRACK DATA...';
+            
+            updatePlaylist();
+            
+            if (currentTrackIndex === -1 && playlist.length > 0) {
+                currentTrackIndex = 0;
+                loadTrack(0);
+            }
+            
+            updateStatus();
+            savePlaylistToStorage();
+            
+            // Clear textarea on success
+            if (successCount > 0) {
+                textarea.value = '';
+            }
+            
+            // Show results
+            let message = `✅ Added ${successCount} track${successCount !== 1 ? 's' : ''}`;
+            if (failCount > 0) {
+                message += `\n❌ Failed: ${failCount}`;
+                if (errors.length <= 3) {
+                    message += '\n\n' + errors.join('\n');
+                }
+            }
+            alert(message);
+        }
+
         function updatePlaylist() {
             const playlistEl = document.getElementById('playlist');
             playlistEl.innerHTML = '';
@@ -1657,32 +1839,12 @@
                 audioContext.resume();
             }
             
-            // Request audio session for background playback (iOS)
-            if (activePlayer.play) {
-                const playPromise = activePlayer.play();
-                
-                if (playPromise !== undefined) {
-                    playPromise
-                        .then(() => {
-                            isPlaying = true;
-                            playBtn.innerHTML = '⏸';
-                            document.getElementById('led1').classList.remove('off');
-                            startVisualizer();
-                            updateMediaSession();
-                            
-                            // Keep screen wake lock if supported
-                            if ('wakeLock' in navigator) {
-                                navigator.wakeLock.request('screen').catch(err => {
-                                    console.log('Wake lock failed:', err);
-                                });
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Playback failed:', error);
-                            isPlaying = false;
-                        });
-                }
-            }
+            activePlayer.play();
+            isPlaying = true;
+            playBtn.innerHTML = '⏸';
+            document.getElementById('led1').classList.remove('off');
+            startVisualizer();
+            updateMediaSession();
         }
 
         function pause() {
@@ -1744,7 +1906,13 @@
             });
 
             player.addEventListener('ended', () => {
-                nextTrack();
+                // If there's only one track, reset to beginning
+                if (playlist.length === 1) {
+                    player.currentTime = 0;
+                    pause();
+                } else {
+                    nextTrack();
+                }
             });
 
             player.addEventListener('error', (e) => {
@@ -1770,60 +1938,20 @@
         // Load saved playlist on page load
         loadPlaylistFromStorage();
 
-        // Keep audio playing even when page is hidden (background playback)
+        // Keep audio playing when page is hidden (background playback)
         document.addEventListener('visibilitychange', () => {
             if (document.hidden && isPlaying) {
-                // Page is hidden but we want to keep playing
                 // Ensure audio context stays active
                 if (audioContext && audioContext.state === 'suspended') {
                     audioContext.resume();
                 }
-                // Make sure player doesn't pause
-                if (activePlayer.paused && isPlaying) {
-                    activePlayer.play().catch(err => console.log('Background play prevented:', err));
-                }
             }
         });
 
-        // Prevent audio from stopping when switching apps
-        window.addEventListener('blur', () => {
-            // Window lost focus but keep playing
-            if (isPlaying && audioContext && audioContext.state === 'suspended') {
-                audioContext.resume();
-            }
-        });
-
-        // Critical for iOS - pagehide event fires when app is backgrounded
-        window.addEventListener('pagehide', (event) => {
-            // Don't pause! iOS will try to kill audio but we resist
-            if (isPlaying) {
-                event.preventDefault();
-                if (audioContext && audioContext.state === 'suspended') {
-                    audioContext.resume();
-                }
-            }
-        });
-
-        // Resume when coming back to foreground
+        // Resume audio context when coming back to foreground
         window.addEventListener('pageshow', (event) => {
-            if (isPlaying && activePlayer.paused) {
-                activePlayer.play().catch(err => console.log('Resume failed:', err));
-            }
             if (audioContext && audioContext.state === 'suspended') {
                 audioContext.resume();
-            }
-        });
-
-        // iOS specifically - handle audio interruptions
-        audioPlayer.addEventListener('pause', () => {
-            // If we're supposed to be playing but got paused externally
-            if (isPlaying && !activePlayer.ended) {
-                // Try to resume after a brief delay
-                setTimeout(() => {
-                    if (isPlaying && activePlayer.paused) {
-                        activePlayer.play().catch(err => console.log('Auto-resume failed:', err));
-                    }
-                }, 100);
             }
         });
 
