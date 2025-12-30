@@ -188,16 +188,17 @@
             right: 0;
             bottom: 0;
             background: 
-                linear-gradient(0deg, transparent 24%, rgba(255, 215, 0, 0.08) 25%, rgba(255, 215, 0, 0.08) 26%, transparent 27%, transparent 74%, rgba(255, 215, 0, 0.08) 75%, rgba(255, 215, 0, 0.08) 76%, transparent 77%, transparent),
-                linear-gradient(90deg, transparent 24%, rgba(255, 110, 199, 0.06) 25%, rgba(255, 110, 199, 0.06) 26%, transparent 27%, transparent 74%, rgba(255, 110, 199, 0.06) 75%, rgba(255, 110, 199, 0.06) 76%, transparent 77%, transparent);
-            background-size: 60px 60px;
+                linear-gradient(0deg, transparent 24%, var(--grid-color-1, rgba(255, 215, 0, 0.15)) 25%, var(--grid-color-1, rgba(255, 215, 0, 0.15)) 26%, transparent 27%, transparent 74%, var(--grid-color-1, rgba(255, 215, 0, 0.15)) 75%, var(--grid-color-1, rgba(255, 215, 0, 0.15)) 76%, transparent 77%, transparent),
+                linear-gradient(90deg, transparent 24%, var(--grid-color-2, rgba(255, 110, 199, 0.12)) 25%, var(--grid-color-2, rgba(255, 110, 199, 0.12)) 26%, transparent 27%, transparent 74%, var(--grid-color-2, rgba(255, 110, 199, 0.12)) 75%, var(--grid-color-2, rgba(255, 110, 199, 0.12)) 76%, transparent 77%, transparent);
+            background-size: var(--grid-size, 60px) var(--grid-size, 60px);
             background-position: 0 0;
-            transform: perspective(600px) rotateX(60deg) translateZ(0);
+            transform: perspective(var(--grid-perspective, 600px)) rotateX(var(--grid-rotation, 60deg)) translateZ(0) scale(var(--grid-scale-bg, 1));
             transform-origin: center bottom;
-            animation: gridMove 25s linear infinite;
-            opacity: 0.4;
+            animation: gridMove var(--grid-speed, 25s) linear infinite;
+            opacity: var(--grid-opacity-bg, 0.5);
             pointer-events: none;
             z-index: 0;
+            transition: all 0.3s ease;
         }
 
         @keyframes gridMove {
@@ -1971,22 +1972,63 @@
             const walkmanGlow = document.querySelector('.walkman-glow');
             const now = Date.now();
             
-            // Continuously update grid based on audio
+            // Continuously update grid based on audio - COLOR SHIFTING + REACTIVE SCALING
             const bassIntensity = Math.max(...dataArray.slice(0, 8)) / 255;
+            const midIntensity = Math.max(...dataArray.slice(8, 32)) / 255;
+            const highIntensity = Math.max(...dataArray.slice(32, 64)) / 255;
+            
+            // COLOR SHIFTING - Grid changes color based on dominant frequency
+            let gridColor1, gridColor2;
+            if (bassIntensity > midIntensity && bassIntensity > highIntensity) {
+                // Bass dominant - Yellow/Orange
+                const intensity = bassIntensity;
+                gridColor1 = `rgba(255, 215, 0, ${0.15 + intensity * 0.25})`;
+                gridColor2 = `rgba(255, 140, 0, ${0.12 + intensity * 0.2})`;
+            } else if (highIntensity > bassIntensity && highIntensity > midIntensity) {
+                // Highs dominant - Cyan/Blue
+                const intensity = highIntensity;
+                gridColor1 = `rgba(0, 255, 204, ${0.15 + intensity * 0.25})`;
+                gridColor2 = `rgba(120, 115, 245, ${0.12 + intensity * 0.2})`;
+            } else {
+                // Mids dominant - Pink/Purple
+                const intensity = midIntensity;
+                gridColor1 = `rgba(255, 110, 199, ${0.15 + intensity * 0.25})`;
+                gridColor2 = `rgba(200, 100, 255, ${0.12 + intensity * 0.2})`;
+            }
+            
+            // REACTIVE SCALING - Grid size and perspective change with music
+            const overallIntensity = (bassIntensity + midIntensity + highIntensity) / 3;
+            const gridSize = 60 - (bassIntensity * 15); // 60px to 45px on bass
+            const gridPerspective = 600 + (midIntensity * 200); // 600px to 800px
+            const gridRotation = 60 + (highIntensity * 10); // 60deg to 70deg
+            const gridScale = 1 + (overallIntensity * 0.15); // 1.0 to 1.15
+            const gridOpacity = 0.5 + (overallIntensity * 0.3); // 0.5 to 0.8
+            const gridSpeed = bassIntensity > 0.6 ? 8 : 25; // Speed up on bass hits
+            
+            // Apply to body background grid
+            const bodyEl = document.body;
+            bodyEl.style.setProperty('--grid-color-1', gridColor1);
+            bodyEl.style.setProperty('--grid-color-2', gridColor2);
+            bodyEl.style.setProperty('--grid-size', gridSize + 'px');
+            bodyEl.style.setProperty('--grid-perspective', gridPerspective + 'px');
+            bodyEl.style.setProperty('--grid-rotation', gridRotation + 'deg');
+            bodyEl.style.setProperty('--grid-scale-bg', gridScale);
+            bodyEl.style.setProperty('--grid-opacity-bg', gridOpacity);
+            bodyEl.style.setProperty('--grid-speed', gridSpeed + 's');
+            
             const gridOpacity = 0.4 + (bassIntensity * 0.6);
             const gridScale = 2 + (bassIntensity * 0.8);
             const backgroundGlowIntensity = 0.12 + (avgValue / 255) * 0.3;
             
-            walkmanEl.style.setProperty('--grid-opacity', gridOpacity);
-            walkmanEl.style.setProperty('--grid-scale', gridScale);
+            // Update walkman inner grid (keeping existing behavior)
+            const walkmanGridOpacity = 0.4 + (bassIntensity * 0.6);
+            const walkmanGridScale = 2 + (bassIntensity * 0.8);
+            const backgroundGlowIntensity = 0.12 + (avgValue / 255) * 0.3;
+            
+            walkmanEl.style.setProperty('--grid-opacity', walkmanGridOpacity);
+            walkmanEl.style.setProperty('--grid-scale', walkmanGridScale);
             if (walkmanGlow) {
                 walkmanGlow.style.setProperty('--glow-intensity', backgroundGlowIntensity);
-            }
-            
-            if (bassIntensity > 0.6) {
-                walkmanEl.style.setProperty('--grid-speed', '4s');
-            } else {
-                walkmanEl.style.setProperty('--grid-speed', '8s');
             }
             
             if (maxValue > 180 && (now - lastPulseTime) > pulseThreshold) {
