@@ -2593,7 +2593,7 @@
                 // Query Objkt.com API for random audio NFTs
                 // Using a random offset to get different results each time
                 const randomOffset = Math.floor(Math.random() * 500);
-                const limit = 50; // Fetch more since we'll filter out sound effects
+                const limit = 100; // Fetch 100 to have plenty after filtering
                 
                 const response = await fetch(`https://data.objkt.com/v3/graphql`, {
                     method: 'POST',
@@ -2643,7 +2643,7 @@
                 loading.classList.add('active');
                 
                 let successCount = 0;
-                const maxTracks = 20; // Load max 20 random tracks
+                const maxTracks = 50; // Load max 50 random tracks
                 
                 // Shuffle and take subset
                 const shuffled = tokens.sort(() => Math.random() - 0.5).slice(0, maxTracks);
@@ -2668,7 +2668,7 @@
                         successCount++;
                         
                         // Stop if we have enough tracks
-                        if (successCount >= 20) {
+                        if (successCount >= 50) {
                             break;
                         }
                     } catch (error) {
