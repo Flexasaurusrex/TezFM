@@ -1863,16 +1863,24 @@
                 const dataIndex = Math.floor((i / bars) * (bufferLength * 0.6));
                 let value = dataArray[dataIndex] || 0;
                 
-                // AGGRESSIVE frequency balancing - full spectrum coverage
-                if (i < bars / 6) {
-                    // Bass - CRUSH IT (40% reduction)
-                    value = value * 0.6;
-                } else if (i < bars / 3) {
+                // NUCLEAR frequency balancing - prevent bass domination
+                if (i < bars / 8) {
+                    // Bass - OBLITERATE IT (20% only!)
+                    value = value * 0.2;
+                } else if (i < bars / 4) {
+                    // Low bass - still crush (30%)
+                    value = value * 0.3;
+                } else if (i < bars / 2) {
                     // Low-mids - moderate boost
-                    value = Math.min(255, value * 1.5);
+                    value = Math.min(255, value * 1.8);
                 } else {
                     // Everything else - MASSIVE BOOST (vocals, instruments)
-                    value = Math.min(255, value * 2.8);
+                    value = Math.min(255, value * 3.2);
+                }
+                
+                // Add dynamic range compression to prevent saturation
+                if (value > 200) {
+                    value = 200 + (value - 200) * 0.2; // Heavily compress peaks
                 }
                 
                 // Light smoothing for wave-like motion (more responsive)
